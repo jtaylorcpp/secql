@@ -1,0 +1,15 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+type EC2Instance {
+  id: ID!
+  public: Boolean!
+  name: String!
+  publicIP: String!
+  privateIP: String!
+}
+
+type Query {
+  ec2Instances: [EC2Instance!]!
+}
