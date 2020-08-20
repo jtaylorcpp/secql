@@ -3,9 +3,18 @@
 package model
 
 type EC2Instance struct {
-	ID        string `json:"id"`
-	Public    bool   `json:"public"`
-	Name      string `json:"name"`
-	PublicIP  string `json:"publicIP"`
-	PrivateIP string `json:"privateIP"`
+	ID        string  `json:"id"`
+	Public    bool    `json:"public"`
+	Name      string  `json:"name"`
+	PublicIP  string  `json:"publicIP"`
+	PrivateIP string  `json:"privateIP"`
+	OsInfo    *OSInfo `json:"osInfo"`
+}
+
+type OSInfo struct {
+	ID             string `json:"id"`
+	Version        string `json:"version"`
+	Arch           string `json:"arch"`
+	PlatformDistro string `json:"platformDistro"`
+	PlatformBase   string `json:"platformBase"`
 }

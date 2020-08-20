@@ -8,6 +8,15 @@ type EC2Instance {
   name: String!
   publicIP: String!
   privateIP: String!
+  osInfo: OSInfo!
+}
+
+type OSInfo {
+  id: ID!
+  version: String!
+  arch: String!
+  platformDistro: String!
+  platformBase: String!
 }
 
 type Query {

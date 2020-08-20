@@ -45,9 +45,18 @@ type ComplexityRoot struct {
 	EC2Instance struct {
 		ID        func(childComplexity int) int
 		Name      func(childComplexity int) int
+		OsInfo    func(childComplexity int) int
 		PrivateIP func(childComplexity int) int
 		Public    func(childComplexity int) int
 		PublicIP  func(childComplexity int) int
+	}
+
+	OSInfo struct {
+		Arch           func(childComplexity int) int
+		ID             func(childComplexity int) int
+		PlatformBase   func(childComplexity int) int
+		PlatformDistro func(childComplexity int) int
+		Version        func(childComplexity int) int
 	}
 
 	Query struct {
@@ -88,6 +97,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.EC2Instance.Name(childComplexity), true
 
+	case "EC2Instance.osInfo":
+		if e.complexity.EC2Instance.OsInfo == nil {
+			break
+		}
+
+		return e.complexity.EC2Instance.OsInfo(childComplexity), true
+
 	case "EC2Instance.privateIP":
 		if e.complexity.EC2Instance.PrivateIP == nil {
 			break
@@ -108,6 +124,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.EC2Instance.PublicIP(childComplexity), true
+
+	case "OSInfo.arch":
+		if e.complexity.OSInfo.Arch == nil {
+			break
+		}
+
+		return e.complexity.OSInfo.Arch(childComplexity), true
+
+	case "OSInfo.id":
+		if e.complexity.OSInfo.ID == nil {
+			break
+		}
+
+		return e.complexity.OSInfo.ID(childComplexity), true
+
+	case "OSInfo.platformBase":
+		if e.complexity.OSInfo.PlatformBase == nil {
+			break
+		}
+
+		return e.complexity.OSInfo.PlatformBase(childComplexity), true
+
+	case "OSInfo.platformDistro":
+		if e.complexity.OSInfo.PlatformDistro == nil {
+			break
+		}
+
+		return e.complexity.OSInfo.PlatformDistro(childComplexity), true
+
+	case "OSInfo.version":
+		if e.complexity.OSInfo.Version == nil {
+			break
+		}
+
+		return e.complexity.OSInfo.Version(childComplexity), true
 
 	case "Query.ec2Instances":
 		if e.complexity.Query.Ec2Instances == nil {
@@ -176,6 +227,15 @@ type EC2Instance {
   name: String!
   publicIP: String!
   privateIP: String!
+  osInfo: OSInfo!
+}
+
+type OSInfo {
+  id: ID!
+  version: String!
+  arch: String!
+  platformDistro: String!
+  platformBase: String!
 }
 
 type Query {
@@ -392,6 +452,210 @@ func (ec *executionContext) _EC2Instance_privateIP(ctx context.Context, field gr
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PrivateIP, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _EC2Instance_osInfo(ctx context.Context, field graphql.CollectedField, obj *model.EC2Instance) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "EC2Instance",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.OsInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.OSInfo)
+	fc.Result = res
+	return ec.marshalNOSInfo2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐOSInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OSInfo_id(ctx context.Context, field graphql.CollectedField, obj *model.OSInfo) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OSInfo",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OSInfo_version(ctx context.Context, field graphql.CollectedField, obj *model.OSInfo) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OSInfo",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Version, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OSInfo_arch(ctx context.Context, field graphql.CollectedField, obj *model.OSInfo) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OSInfo",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Arch, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OSInfo_platformDistro(ctx context.Context, field graphql.CollectedField, obj *model.OSInfo) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OSInfo",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PlatformDistro, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OSInfo_platformBase(ctx context.Context, field graphql.CollectedField, obj *model.OSInfo) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OSInfo",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PlatformBase, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1610,6 +1874,58 @@ func (ec *executionContext) _EC2Instance(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "osInfo":
+			out.Values[i] = ec._EC2Instance_osInfo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var oSInfoImplementors = []string{"OSInfo"}
+
+func (ec *executionContext) _OSInfo(ctx context.Context, sel ast.SelectionSet, obj *model.OSInfo) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, oSInfoImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("OSInfo")
+		case "id":
+			out.Values[i] = ec._OSInfo_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "version":
+			out.Values[i] = ec._OSInfo_version(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "arch":
+			out.Values[i] = ec._OSInfo_arch(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "platformDistro":
+			out.Values[i] = ec._OSInfo_platformDistro(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "platformBase":
+			out.Values[i] = ec._OSInfo_platformBase(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1987,6 +2303,20 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNOSInfo2githubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐOSInfo(ctx context.Context, sel ast.SelectionSet, v model.OSInfo) graphql.Marshaler {
+	return ec._OSInfo(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNOSInfo2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐOSInfo(ctx context.Context, sel ast.SelectionSet, v *model.OSInfo) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._OSInfo(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
