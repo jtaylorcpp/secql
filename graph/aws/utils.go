@@ -17,6 +17,7 @@ import (
 
 func init() {
 	logrus.SetLevel(logrus.DebugLevel)
+	logrus.SetReportCaller(true)
 }
 
 // GetAllRegions returns all of the AWS EC2 available regions
@@ -48,18 +49,20 @@ func GetRegionalSession(sess *session.Session, region string) *session.Session {
 	return regionalSession
 }
 
-func NewEC2SSHSession(sess *session.Session, instance model.EC2Instance) error {
+func NewEC2SSHSession(sess *session.Session, instance model.EC2Instance) (*ssh.Client, error) {
 	key, err := rsa.GenerateKey(rand.Reader, 4096)
 	if err != nil {
-		return err
+		logrus.Error(err.Error())
+		return nil, err
 	}
 
 	logrus.Debugf("priv: %#v\n", key)
 	logrus.Debugf("pub: %#v\n", key.Public())
 
-	sshPubKey, err := ssh.NewPublicKey(key.Public())
+	sshPubKey, err := ssh.NewPublicKey(&key.PublicKey)
 	if err != nil {
-		return err
+		logrus.Error(err.Error())
+		return nil, err
 	}
 
 	sshPubKeyBytes := ssh.MarshalAuthorizedKey(sshPubKey)
@@ -71,31 +74,50 @@ func NewEC2SSHSession(sess *session.Session, instance model.EC2Instance) error {
 	input := &ec2instanceconnect.SendSSHPublicKeyInput{
 		AvailabilityZone: aws.String(instance.AvailabilityZone),
 		InstanceId:       aws.String(instance.ID),
-		InstanceOSUser:   aws.String("ec2-user"),
+		InstanceOSUser:   aws.String("ubuntu"),
 		SSHPublicKey:     aws.String(string(sshPubKeyBytes)),
 	}
 
 	result, err := svc.SendSSHPublicKey(input)
 	if err != nil {
-		return err
+		logrus.Error(err.Error())
+		return nil, err
 	}
 	logrus.Debugf("ec2 instance connect for instance %s has result: %#v\n", instance.ID, result)
 
 	// start ssh session
-	signer, err := ssh.ParsePrivateKey(key)
+	signer, err := ssh.NewSignerFromKey(key)
 	if err != nil {
-		return err
+		logrus.Error(err.Error())
+		return nil, err
 	}
 
 	config := &ssh.ClientConfig{
-		User: "ec2-user",
+		User: "ubuntu",
 		Auth: []ssh.AuthMethod{
 			ssh.PublicKeys(signer),
 		},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
-	return nil
+	var sshClient *ssh.Client
+	if instance.Public {
+		sshClient, err = ssh.Dial("tcp", instance.PublicIP+":22", config)
+		if err != nil {
+			logrus.Error(err.Error())
+			return nil, err
+		}
+	} else {
+		sshClient, err = ssh.Dial("tcp", instance.PrivateIP+":22", config)
+		if err != nil {
+			logrus.Error(err.Error())
+			return nil, err
+		}
+	}
+
+	logrus.Debugf("ssh session: %#v", *sshClient)
+
+	return sshClient, nil
 }
 
 func parseTime(layout, value string) *time.Time {

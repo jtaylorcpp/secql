@@ -59,7 +59,7 @@ func (r *queryResolver) Ec2Instances(ctx context.Context) ([]*model.EC2Instance,
 							}
 						}
 
-						sshError := aws.NewEC2SSHSession(regionalSess, *instanceModel)
+						_, sshError := aws.NewEC2SSHSession(regionalSess, *instanceModel)
 						if sshError != nil {
 							logrus.Errorf("ssh error: %s\n", sshError.Error())
 						}
