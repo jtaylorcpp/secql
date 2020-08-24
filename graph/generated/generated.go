@@ -43,12 +43,13 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	EC2Instance struct {
-		ID        func(childComplexity int) int
-		Name      func(childComplexity int) int
-		OsInfo    func(childComplexity int) int
-		PrivateIP func(childComplexity int) int
-		Public    func(childComplexity int) int
-		PublicIP  func(childComplexity int) int
+		AvailabilityZone func(childComplexity int) int
+		ID               func(childComplexity int) int
+		Name             func(childComplexity int) int
+		OsInfo           func(childComplexity int) int
+		PrivateIP        func(childComplexity int) int
+		Public           func(childComplexity int) int
+		PublicIP         func(childComplexity int) int
 	}
 
 	OSInfo struct {
@@ -82,6 +83,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "EC2Instance.availabilityZone":
+		if e.complexity.EC2Instance.AvailabilityZone == nil {
+			break
+		}
+
+		return e.complexity.EC2Instance.AvailabilityZone(childComplexity), true
 
 	case "EC2Instance.id":
 		if e.complexity.EC2Instance.ID == nil {
@@ -227,6 +235,7 @@ type EC2Instance {
   name: String!
   publicIP: String!
   privateIP: String!
+  availabilityZone: String!
   osInfo: OSInfo!
 }
 
@@ -452,6 +461,40 @@ func (ec *executionContext) _EC2Instance_privateIP(ctx context.Context, field gr
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PrivateIP, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _EC2Instance_availabilityZone(ctx context.Context, field graphql.CollectedField, obj *model.EC2Instance) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "EC2Instance",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AvailabilityZone, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1871,6 +1914,11 @@ func (ec *executionContext) _EC2Instance(ctx context.Context, sel ast.SelectionS
 			}
 		case "privateIP":
 			out.Values[i] = ec._EC2Instance_privateIP(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "availabilityZone":
+			out.Values[i] = ec._EC2Instance_availabilityZone(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

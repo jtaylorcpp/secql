@@ -44,8 +44,9 @@ func (r *queryResolver) Ec2Instances(ctx context.Context) ([]*model.EC2Instance,
 						instanceModel := &model.EC2Instance{
 							ID: *instance.InstanceId,
 							//Name      string  `json:"name"`
-							PublicIP:  *instance.PublicIpAddress,
-							PrivateIP: *instance.PrivateIpAddress,
+							PublicIP:         *instance.PublicIpAddress,
+							PrivateIP:        *instance.PrivateIpAddress,
+							AvailabilityZone: *instance.Placement.AvailabilityZone,
 						}
 
 						if instanceModel.PublicIP != "" {
@@ -56,6 +57,11 @@ func (r *queryResolver) Ec2Instances(ctx context.Context) ([]*model.EC2Instance,
 							if strings.ToLower(*tag.Key) == "name" {
 								instanceModel.Name = *tag.Value
 							}
+						}
+
+						sshError := aws.NewEC2SSHSession(regionalSess, *instanceModel)
+						if sshError != nil {
+							logrus.Errorf("ssh error: %s\n", sshError.Error())
 						}
 
 						instanceModels = append(instanceModels, instanceModel)
@@ -75,3 +81,13 @@ func (r *queryResolver) Ec2Instances(ctx context.Context) ([]*model.EC2Instance,
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func init() {
+	logrus.SetLevel(logrus.DebugLevel)
+}

@@ -3,12 +3,13 @@
 package model
 
 type EC2Instance struct {
-	ID        string  `json:"id"`
-	Public    bool    `json:"public"`
-	Name      string  `json:"name"`
-	PublicIP  string  `json:"publicIP"`
-	PrivateIP string  `json:"privateIP"`
-	OsInfo    *OSInfo `json:"osInfo"`
+	ID               string  `json:"id"`
+	Public           bool    `json:"public"`
+	Name             string  `json:"name"`
+	PublicIP         string  `json:"publicIP"`
+	PrivateIP        string  `json:"privateIP"`
+	AvailabilityZone string  `json:"availabilityZone"`
+	OsInfo           *OSInfo `json:"osInfo"`
 }
 
 type OSInfo struct {
