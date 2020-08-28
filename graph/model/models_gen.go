@@ -2,6 +2,10 @@
 
 package model
 
+type Ami struct {
+	ID string `json:"id"`
+}
+
 type EC2Instance struct {
 	ID               string  `json:"id"`
 	Public           bool    `json:"public"`
@@ -10,6 +14,7 @@ type EC2Instance struct {
 	PrivateIP        string  `json:"privateIP"`
 	AvailabilityZone string  `json:"availabilityZone"`
 	OsInfo           *OSInfo `json:"osInfo"`
+	Ami              *Ami    `json:"ami"`
 }
 
 type OSInfo struct {

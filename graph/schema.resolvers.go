@@ -7,6 +7,7 @@ import (
 	"context"
 	"strings"
 
+	awsTypes "github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/jtaylorcpp/secql/graph/aws"
 	"github.com/jtaylorcpp/secql/graph/generated"
@@ -14,11 +15,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func init() {
-	logrus.SetLevel(logrus.DebugLevel)
-}
-
 func (r *queryResolver) Ec2Instances(ctx context.Context) ([]*model.EC2Instance, error) {
+	logrus.SetLevel(logrus.DebugLevel)
 	logrus.Debugln("getting all ec2 instances")
 	regions, err := aws.GetAllRegions(r.Session)
 	if err != nil {
@@ -32,6 +30,7 @@ func (r *queryResolver) Ec2Instances(ctx context.Context) ([]*model.EC2Instance,
 	instanceModels := []*model.EC2Instance{}
 
 	for _, region := range regions {
+		logrus.Debugf("running in region: %s", region)
 		regionalSess := aws.GetRegionalSession(r.Session, region)
 		svc := ec2.New(regionalSess)
 		input := &ec2.DescribeInstancesInput{
@@ -59,13 +58,38 @@ func (r *queryResolver) Ec2Instances(ctx context.Context) ([]*model.EC2Instance,
 							}
 						}
 
-						_, sshError := aws.NewEC2SSHSession(regionalSess, *instanceModel)
+						descirbeImageInput := &ec2.DescribeImagesInput{
+							Filters: []*ec2.Filter{
+								&ec2.Filter{
+									Name: awsTypes.String("image-id"),
+									Values: []*string{
+										instance.ImageId,
+									},
+								},
+							},
+						}
+
+						output, imageError := svc.DescribeImages(descirbeImageInput)
+						if imageError != nil {
+							logrus.Errorf("image describe error: %s\n", imageError.Error())
+						}
+
+						if len(output.Images) == 0 {
+							logrus.Error("no images available for image")
+						} else {
+							instanceModel.Ami = &model.Ami{
+								ID: *output.Images[0].ImageId,
+							}
+						}
+
+						logrus.Debugf("got instance: %#v", instanceModel)
+						sshClient, sshError := aws.NewEC2SSHSession(regionalSess, *instanceModel)
 						if sshError != nil {
 							logrus.Errorf("ssh error: %s\n", sshError.Error())
 						}
 
+						logrus.Debugf("got client: %#v", *sshClient)
 						instanceModels = append(instanceModels, instanceModel)
-
 					}
 				}
 				return !lastPage
@@ -81,13 +105,3 @@ func (r *queryResolver) Ec2Instances(ctx context.Context) ([]*model.EC2Instance,
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-func init() {
-	logrus.SetLevel(logrus.DebugLevel)
-}

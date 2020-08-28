@@ -3,6 +3,7 @@ package aws
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"errors"
 	"time"
 
 	"golang.org/x/crypto/ssh"
@@ -50,6 +51,7 @@ func GetRegionalSession(sess *session.Session, region string) *session.Session {
 }
 
 func NewEC2SSHSession(sess *session.Session, instance model.EC2Instance) (*ssh.Client, error) {
+	possibleUserNames := []string{"ec2-user", "ubuntu"}
 	key, err := rsa.GenerateKey(rand.Reader, 4096)
 	if err != nil {
 		logrus.Error(err.Error())
@@ -71,53 +73,55 @@ func NewEC2SSHSession(sess *session.Session, instance model.EC2Instance) (*ssh.C
 	logrus.Debugf("ssh: %#v\n", string(sshPubKeyBytes))
 
 	svc := ec2instanceconnect.New(sess)
-	input := &ec2instanceconnect.SendSSHPublicKeyInput{
-		AvailabilityZone: aws.String(instance.AvailabilityZone),
-		InstanceId:       aws.String(instance.ID),
-		InstanceOSUser:   aws.String("ubuntu"),
-		SSHPublicKey:     aws.String(string(sshPubKeyBytes)),
-	}
-
-	result, err := svc.SendSSHPublicKey(input)
-	if err != nil {
-		logrus.Error(err.Error())
-		return nil, err
-	}
-	logrus.Debugf("ec2 instance connect for instance %s has result: %#v\n", instance.ID, result)
-
-	// start ssh session
-	signer, err := ssh.NewSignerFromKey(key)
-	if err != nil {
-		logrus.Error(err.Error())
-		return nil, err
-	}
-
-	config := &ssh.ClientConfig{
-		User: "ubuntu",
-		Auth: []ssh.AuthMethod{
-			ssh.PublicKeys(signer),
-		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-	}
-
 	var sshClient *ssh.Client
-	if instance.Public {
-		sshClient, err = ssh.Dial("tcp", instance.PublicIP+":22", config)
+	for _, user := range possibleUserNames {
+		input := &ec2instanceconnect.SendSSHPublicKeyInput{
+			AvailabilityZone: aws.String(instance.AvailabilityZone),
+			InstanceId:       aws.String(instance.ID),
+			InstanceOSUser:   aws.String(user),
+			SSHPublicKey:     aws.String(string(sshPubKeyBytes)),
+		}
+
+		result, err := svc.SendSSHPublicKey(input)
 		if err != nil {
 			logrus.Error(err.Error())
-			return nil, err
+			break
 		}
-	} else {
-		sshClient, err = ssh.Dial("tcp", instance.PrivateIP+":22", config)
+		logrus.Debugf("ec2 instance connect for instance %s has result: %#v\n", instance.ID, result)
+
+		// start ssh session
+		signer, err := ssh.NewSignerFromKey(key)
 		if err != nil {
 			logrus.Error(err.Error())
-			return nil, err
+			break
 		}
+
+		config := &ssh.ClientConfig{
+			User: user,
+			Auth: []ssh.AuthMethod{
+				ssh.PublicKeys(signer),
+			},
+			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		}
+
+		if instance.Public {
+			sshClient, err = ssh.Dial("tcp", instance.PublicIP+":22", config)
+			if err != nil {
+				logrus.Error(err.Error())
+				break
+			}
+		} else {
+			sshClient, err = ssh.Dial("tcp", instance.PrivateIP+":22", config)
+			if err != nil {
+				logrus.Error(err.Error())
+				break
+			}
+		}
+		logrus.Debugf("ssh session: %#v", *sshClient)
+		return sshClient, nil
 	}
 
-	logrus.Debugf("ssh session: %#v", *sshClient)
-
-	return sshClient, nil
+	return nil, errors.New("no ssh session was completed")
 }
 
 func parseTime(layout, value string) *time.Time {

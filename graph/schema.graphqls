@@ -10,6 +10,11 @@ type EC2Instance {
   privateIP: String!
   availabilityZone: String!
   osInfo: OSInfo!
+  ami: AMI!
+}
+
+type AMI {
+  id: ID!
 }
 
 type OSInfo {
