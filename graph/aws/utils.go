@@ -58,9 +58,6 @@ func NewEC2SSHSession(sess *session.Session, instance model.EC2Instance) (*ssh.C
 		return nil, err
 	}
 
-	logrus.Debugf("priv: %#v\n", key)
-	logrus.Debugf("pub: %#v\n", key.Public())
-
 	sshPubKey, err := ssh.NewPublicKey(&key.PublicKey)
 	if err != nil {
 		logrus.Error(err.Error())
@@ -69,7 +66,6 @@ func NewEC2SSHSession(sess *session.Session, instance model.EC2Instance) (*ssh.C
 
 	sshPubKeyBytes := ssh.MarshalAuthorizedKey(sshPubKey)
 
-	logrus.Debugf("ssh: %#v\n", string(sshPubKey.Marshal()))
 	logrus.Debugf("ssh: %#v\n", string(sshPubKeyBytes))
 
 	svc := ec2instanceconnect.New(sess)
@@ -85,15 +81,15 @@ func NewEC2SSHSession(sess *session.Session, instance model.EC2Instance) (*ssh.C
 		result, err := svc.SendSSHPublicKey(input)
 		if err != nil {
 			logrus.Error(err.Error())
-			break
+			continue
 		}
-		logrus.Debugf("ec2 instance connect for instance %s has result: %#v\n", instance.ID, result)
+		logrus.Debugf("ec2 instance connect for user %s instance %s has result: %#v\n", user, instance.ID, result)
 
 		// start ssh session
 		signer, err := ssh.NewSignerFromKey(key)
 		if err != nil {
 			logrus.Error(err.Error())
-			break
+			continue
 		}
 
 		config := &ssh.ClientConfig{
@@ -108,13 +104,13 @@ func NewEC2SSHSession(sess *session.Session, instance model.EC2Instance) (*ssh.C
 			sshClient, err = ssh.Dial("tcp", instance.PublicIP+":22", config)
 			if err != nil {
 				logrus.Error(err.Error())
-				break
+				continue
 			}
 		} else {
 			sshClient, err = ssh.Dial("tcp", instance.PrivateIP+":22", config)
 			if err != nil {
 				logrus.Error(err.Error())
-				break
+				continue
 			}
 		}
 		logrus.Debugf("ssh session: %#v", *sshClient)

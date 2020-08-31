@@ -12,6 +12,7 @@ import (
 	"github.com/jtaylorcpp/secql/graph/aws"
 	"github.com/jtaylorcpp/secql/graph/generated"
 	"github.com/jtaylorcpp/secql/graph/model"
+	osquery "github.com/jtaylorcpp/secql/graph/osquery/interactive"
 	"github.com/sirupsen/logrus"
 )
 
@@ -89,6 +90,12 @@ func (r *queryResolver) Ec2Instances(ctx context.Context) ([]*model.EC2Instance,
 						}
 
 						logrus.Debugf("got client: %#v", *sshClient)
+
+						osqOSInfo, err := osquery.GetOS(sshClient)
+						if err != nil {
+							logrus.Errorf("got error from osquery OS discovery: %s", err.Error())
+						}
+						logrus.Debugf("osquery OS info: %#v", osqOSInfo)
 						instanceModels = append(instanceModels, instanceModel)
 					}
 				}
