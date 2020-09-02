@@ -105,6 +105,29 @@ func (r *queryResolver) Ec2Instances(ctx context.Context) ([]*model.EC2Instance,
 							PlatformDistro: osqOSInfo.Platform,
 							PlatformBase:   osqOSInfo.PlatformLike,
 						}
+
+						osqPackages, err := osquery.GetPackages(sshClient, osqOSInfo)
+						if err != nil {
+							logrus.Errorf("got error from osquery package discovery: %s", err.Error())
+						}
+
+						packages := make([]*model.OSPackage, len(osqPackages))
+						for idx, pkg := range osqPackages {
+							packages[idx] = &model.OSPackage{
+								ID:         pkg.Name,
+								Version:    pkg.Version,
+								Source:     pkg.Source,
+								Size:       pkg.Size,
+								Arch:       pkg.Arch,
+								Revision:   pkg.Revision,
+								Status:     pkg.Status,
+								Maintainer: pkg.Maintainer,
+								Section:    pkg.Section,
+								Priority:   pkg.Priority,
+							}
+						}
+
+						instanceModel.OsPackages = packages
 						instanceModels = append(instanceModels, instanceModel)
 					}
 				}

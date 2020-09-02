@@ -32,6 +32,19 @@ type OSInfo struct {
 	Version      string
 }
 
+type Package struct {
+	Name       string `json:"name"`
+	Version    string `json:"version"`
+	Source     string `json:"source"`
+	Size       string `json:"size"`
+	Arch       string `json:"arch"`
+	Revision   string `json:"revision"`
+	Status     string `json:"status"`
+	Maintainer string `json:"maintainer"`
+	Section    string `json:"section"`
+	Priority   string `json:"priority"`
+}
+
 // osqueryi --json "select * from os_version"
 func GetOS(client *hellossh.Client) (OSInfo, error) {
 
@@ -62,4 +75,48 @@ func GetOS(client *hellossh.Client) (OSInfo, error) {
 	}
 
 	return OSInfo{}, nil
+}
+
+/*
+	example cases:
+		osqueryi --json "select * from Deb_packages limit 1"
+		[
+  			{"arch":"amd64","maintainer":"Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>","name":"accountsservice","priority":"optional","revision":"0ubuntu12~20.04.1","section":"admin","size":"452","source":"","status":"install ok installed","version":"0.6.55-0ubuntu12~20.04.1"}
+		]
+*/
+
+func GetPackages(client *hellossh.Client, osInfo OSInfo) ([]Package, error) {
+	switch osInfo.PlatformLike {
+	case "debian", "ubuntu":
+		/*
+			confirmed oses:
+			  - ubuntu 20.04.01
+		*/
+		var stdout bytes.Buffer
+		var stderr bytes.Buffer
+
+		err := client.Cmd(`osqueryi --json "select * from Deb_packages"`).SetStdio(&stdout, &stderr).Run()
+		if err != nil {
+			logrus.Errorf("error when getting osquery package info: %s", err.Error())
+		}
+
+		logrus.Debugf("recieved from osquery packages command, out:(%s), err:(%s)", stdout.String(), stderr.String())
+
+		if stderr.String() != "" {
+			return []Package{}, errors.New("recieved stderr from machine when running package list")
+		}
+
+		var osPackages []Package
+		err = json.Unmarshal(stdout.Bytes(), &osPackages)
+		if err != nil {
+			return []Package{}, err
+		}
+
+		return osPackages, nil
+
+	default:
+		return []Package{}, errors.New("unkown operating system to collect packages from")
+
+	}
+	return []Package{}, nil
 }

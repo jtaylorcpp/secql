@@ -52,6 +52,7 @@ type ComplexityRoot struct {
 		ID               func(childComplexity int) int
 		Name             func(childComplexity int) int
 		OsInfo           func(childComplexity int) int
+		OsPackages       func(childComplexity int) int
 		PrivateIP        func(childComplexity int) int
 		Public           func(childComplexity int) int
 		PublicIP         func(childComplexity int) int
@@ -64,6 +65,19 @@ type ComplexityRoot struct {
 		PlatformBase   func(childComplexity int) int
 		PlatformDistro func(childComplexity int) int
 		Version        func(childComplexity int) int
+	}
+
+	OSPackage struct {
+		Arch       func(childComplexity int) int
+		ID         func(childComplexity int) int
+		Maintainer func(childComplexity int) int
+		Priority   func(childComplexity int) int
+		Revision   func(childComplexity int) int
+		Section    func(childComplexity int) int
+		Size       func(childComplexity int) int
+		Source     func(childComplexity int) int
+		Status     func(childComplexity int) int
+		Version    func(childComplexity int) int
 	}
 
 	Query struct {
@@ -132,6 +146,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.EC2Instance.OsInfo(childComplexity), true
 
+	case "EC2Instance.osPackages":
+		if e.complexity.EC2Instance.OsPackages == nil {
+			break
+		}
+
+		return e.complexity.EC2Instance.OsPackages(childComplexity), true
+
 	case "EC2Instance.privateIP":
 		if e.complexity.EC2Instance.PrivateIP == nil {
 			break
@@ -194,6 +215,76 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.OSInfo.Version(childComplexity), true
+
+	case "OSPackage.arch":
+		if e.complexity.OSPackage.Arch == nil {
+			break
+		}
+
+		return e.complexity.OSPackage.Arch(childComplexity), true
+
+	case "OSPackage.id":
+		if e.complexity.OSPackage.ID == nil {
+			break
+		}
+
+		return e.complexity.OSPackage.ID(childComplexity), true
+
+	case "OSPackage.maintainer":
+		if e.complexity.OSPackage.Maintainer == nil {
+			break
+		}
+
+		return e.complexity.OSPackage.Maintainer(childComplexity), true
+
+	case "OSPackage.priority":
+		if e.complexity.OSPackage.Priority == nil {
+			break
+		}
+
+		return e.complexity.OSPackage.Priority(childComplexity), true
+
+	case "OSPackage.revision":
+		if e.complexity.OSPackage.Revision == nil {
+			break
+		}
+
+		return e.complexity.OSPackage.Revision(childComplexity), true
+
+	case "OSPackage.section":
+		if e.complexity.OSPackage.Section == nil {
+			break
+		}
+
+		return e.complexity.OSPackage.Section(childComplexity), true
+
+	case "OSPackage.size":
+		if e.complexity.OSPackage.Size == nil {
+			break
+		}
+
+		return e.complexity.OSPackage.Size(childComplexity), true
+
+	case "OSPackage.source":
+		if e.complexity.OSPackage.Source == nil {
+			break
+		}
+
+		return e.complexity.OSPackage.Source(childComplexity), true
+
+	case "OSPackage.status":
+		if e.complexity.OSPackage.Status == nil {
+			break
+		}
+
+		return e.complexity.OSPackage.Status(childComplexity), true
+
+	case "OSPackage.version":
+		if e.complexity.OSPackage.Version == nil {
+			break
+		}
+
+		return e.complexity.OSPackage.Version(childComplexity), true
 
 	case "Query.ec2Instances":
 		if e.complexity.Query.Ec2Instances == nil {
@@ -265,6 +356,7 @@ type EC2Instance {
   availabilityZone: String!
   osInfo: OSInfo!
   ami: AMI!
+  osPackages: [OSPackage!]!
 }
 
 type AMI {
@@ -278,6 +370,19 @@ type OSInfo {
   arch: String!
   platformDistro: String!
   platformBase: String!
+}
+
+type OSPackage {
+  id: ID!
+  version: String!
+  source: String!
+  size: String!
+  arch: String!
+  revision: String!
+  status: String!
+  maintainer: String!
+  section: String!
+  priority: String!
 }
 
 type Query {
@@ -646,6 +751,40 @@ func (ec *executionContext) _EC2Instance_ami(ctx context.Context, field graphql.
 	return ec.marshalNAMI2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐAmi(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _EC2Instance_osPackages(ctx context.Context, field graphql.CollectedField, obj *model.EC2Instance) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "EC2Instance",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.OsPackages, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.OSPackage)
+	fc.Result = res
+	return ec.marshalNOSPackage2ᚕᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐOSPackageᚄ(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _OSInfo_id(ctx context.Context, field graphql.CollectedField, obj *model.OSInfo) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -834,6 +973,346 @@ func (ec *executionContext) _OSInfo_platformBase(ctx context.Context, field grap
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PlatformBase, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OSPackage_id(ctx context.Context, field graphql.CollectedField, obj *model.OSPackage) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OSPackage",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OSPackage_version(ctx context.Context, field graphql.CollectedField, obj *model.OSPackage) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OSPackage",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Version, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OSPackage_source(ctx context.Context, field graphql.CollectedField, obj *model.OSPackage) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OSPackage",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Source, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OSPackage_size(ctx context.Context, field graphql.CollectedField, obj *model.OSPackage) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OSPackage",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Size, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OSPackage_arch(ctx context.Context, field graphql.CollectedField, obj *model.OSPackage) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OSPackage",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Arch, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OSPackage_revision(ctx context.Context, field graphql.CollectedField, obj *model.OSPackage) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OSPackage",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Revision, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OSPackage_status(ctx context.Context, field graphql.CollectedField, obj *model.OSPackage) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OSPackage",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OSPackage_maintainer(ctx context.Context, field graphql.CollectedField, obj *model.OSPackage) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OSPackage",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Maintainer, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OSPackage_section(ctx context.Context, field graphql.CollectedField, obj *model.OSPackage) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OSPackage",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Section, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OSPackage_priority(ctx context.Context, field graphql.CollectedField, obj *model.OSPackage) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OSPackage",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Priority, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2094,6 +2573,11 @@ func (ec *executionContext) _EC2Instance(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "osPackages":
+			out.Values[i] = ec._EC2Instance_osPackages(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2143,6 +2627,78 @@ func (ec *executionContext) _OSInfo(ctx context.Context, sel ast.SelectionSet, o
 			}
 		case "platformBase":
 			out.Values[i] = ec._OSInfo_platformBase(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var oSPackageImplementors = []string{"OSPackage"}
+
+func (ec *executionContext) _OSPackage(ctx context.Context, sel ast.SelectionSet, obj *model.OSPackage) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, oSPackageImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("OSPackage")
+		case "id":
+			out.Values[i] = ec._OSPackage_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "version":
+			out.Values[i] = ec._OSPackage_version(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "source":
+			out.Values[i] = ec._OSPackage_source(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "size":
+			out.Values[i] = ec._OSPackage_size(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "arch":
+			out.Values[i] = ec._OSPackage_arch(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "revision":
+			out.Values[i] = ec._OSPackage_revision(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "status":
+			out.Values[i] = ec._OSPackage_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "maintainer":
+			out.Values[i] = ec._OSPackage_maintainer(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "section":
+			out.Values[i] = ec._OSPackage_section(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "priority":
+			out.Values[i] = ec._OSPackage_priority(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2551,6 +3107,57 @@ func (ec *executionContext) marshalNOSInfo2ᚖgithubᚗcomᚋjtaylorcppᚋsecql�
 		return graphql.Null
 	}
 	return ec._OSInfo(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNOSPackage2githubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐOSPackage(ctx context.Context, sel ast.SelectionSet, v model.OSPackage) graphql.Marshaler {
+	return ec._OSPackage(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNOSPackage2ᚕᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐOSPackageᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.OSPackage) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNOSPackage2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐOSPackage(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNOSPackage2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐOSPackage(ctx context.Context, sel ast.SelectionSet, v *model.OSPackage) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._OSPackage(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

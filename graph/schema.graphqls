@@ -11,6 +11,7 @@ type EC2Instance {
   availabilityZone: String!
   osInfo: OSInfo!
   ami: AMI!
+  osPackages: [OSPackage!]!
 }
 
 type AMI {
@@ -24,6 +25,19 @@ type OSInfo {
   arch: String!
   platformDistro: String!
   platformBase: String!
+}
+
+type OSPackage {
+  id: ID!
+  version: String!
+  source: String!
+  size: String!
+  arch: String!
+  revision: String!
+  status: String!
+  maintainer: String!
+  section: String!
+  priority: String!
 }
 
 type Query {
