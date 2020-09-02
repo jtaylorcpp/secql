@@ -1,14 +1,12 @@
 package osquery
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
-	"io"
-	"io/ioutil"
-	"os"
 
+	hellossh "github.com/helloyi/go-sshclient"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/crypto/ssh"
 )
 
 func init() {
@@ -35,48 +33,26 @@ type OSInfo struct {
 }
 
 // osqueryi --json "select * from os_version"
-func GetOS(client *ssh.Client) (OSInfo, error) {
-	sess, err := client.NewSession()
+func GetOS(client *hellossh.Client) (OSInfo, error) {
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	err := client.Cmd(`osqueryi --json "select * from os_version"`).SetStdio(&stdout, &stderr).Run()
+
 	if err != nil {
+		logrus.Errorf("recieved error when getting OSInfo: %s", err.Error())
 		return OSInfo{}, err
 	}
+	// get it
+	logrus.Debugf("recieved from ssh command, out: (%s), err: (%s)", stdout.String(), stderr.String())
 
-	defer sess.Close()
-
-	sessStdOut, err := sess.StdoutPipe()
-	if err != nil {
-		return OSInfo{}, err
+	if stderr.String() != "" {
+		return OSInfo{}, errors.New("recieved error from machine when querying os information")
 	}
-	go io.Copy(os.Stdout, sessStdOut)
-	sessStderr, err := sess.StderrPipe()
-	if err != nil {
-		return OSInfo{}, err
-	}
-	go io.Copy(os.Stderr, sessStderr)
-	err = sess.Run(`osqueryi --json "select * from os_version"`)
-	if err != nil {
-		return OSInfo{}, err
-	}
-
-	errBytes, err := ioutil.ReadAll(sessStderr)
-	if err != nil {
-		return OSInfo{}, err
-	}
-
-	if len(errBytes) > 0 {
-		logrus.Errorf("recieved error from ssh command: %s", string(errBytes))
-		return OSInfo{}, errors.New(string(errBytes))
-	}
-
-	cmdBytes, err := ioutil.ReadAll(sessStdOut)
-	if err != nil {
-		return OSInfo{}, err
-	}
-
-	logrus.Debugf("recieved output from command: %s", string(cmdBytes))
 
 	var osInfos []OSInfo
-	err = json.Unmarshal(cmdBytes, &osInfos)
+	err = json.Unmarshal(stdout.Bytes(), &osInfos)
 	if err != nil {
 		return OSInfo{}, err
 	}

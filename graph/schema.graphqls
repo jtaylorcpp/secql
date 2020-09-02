@@ -20,6 +20,7 @@ type AMI {
 type OSInfo {
   id: ID!
   version: String!
+  buildVersion: String!
   arch: String!
   platformDistro: String!
   platformBase: String!

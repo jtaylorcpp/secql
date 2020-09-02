@@ -20,6 +20,7 @@ type EC2Instance struct {
 type OSInfo struct {
 	ID             string `json:"id"`
 	Version        string `json:"version"`
+	BuildVersion   string `json:"buildVersion"`
 	Arch           string `json:"arch"`
 	PlatformDistro string `json:"platformDistro"`
 	PlatformBase   string `json:"platformBase"`

@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2instanceconnect"
+	hellossh "github.com/helloyi/go-sshclient"
 	"github.com/jtaylorcpp/secql/graph/model"
 	"github.com/sirupsen/logrus"
 )
@@ -50,7 +51,7 @@ func GetRegionalSession(sess *session.Session, region string) *session.Session {
 	return regionalSession
 }
 
-func NewEC2SSHSession(sess *session.Session, instance model.EC2Instance) (*ssh.Client, error) {
+func NewEC2SSHSession(sess *session.Session, instance model.EC2Instance) (*hellossh.Client, error) {
 	possibleUserNames := []string{"ec2-user", "ubuntu"}
 	key, err := rsa.GenerateKey(rand.Reader, 4096)
 	if err != nil {
@@ -69,7 +70,7 @@ func NewEC2SSHSession(sess *session.Session, instance model.EC2Instance) (*ssh.C
 	logrus.Debugf("ssh: %#v\n", string(sshPubKeyBytes))
 
 	svc := ec2instanceconnect.New(sess)
-	var sshClient *ssh.Client
+	var sshClient *hellossh.Client
 	for _, user := range possibleUserNames {
 		input := &ec2instanceconnect.SendSSHPublicKeyInput{
 			AvailabilityZone: aws.String(instance.AvailabilityZone),
@@ -101,13 +102,13 @@ func NewEC2SSHSession(sess *session.Session, instance model.EC2Instance) (*ssh.C
 		}
 
 		if instance.Public {
-			sshClient, err = ssh.Dial("tcp", instance.PublicIP+":22", config)
+			sshClient, err = hellossh.Dial("tcp", instance.PublicIP+":22", config)
 			if err != nil {
 				logrus.Error(err.Error())
 				continue
 			}
 		} else {
-			sshClient, err = ssh.Dial("tcp", instance.PrivateIP+":22", config)
+			sshClient, err = hellossh.Dial("tcp", instance.PrivateIP+":22", config)
 			if err != nil {
 				logrus.Error(err.Error())
 				continue

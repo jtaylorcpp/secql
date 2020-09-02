@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	awsTypes "github.com/aws/aws-sdk-go/aws"
@@ -96,6 +97,14 @@ func (r *queryResolver) Ec2Instances(ctx context.Context) ([]*model.EC2Instance,
 							logrus.Errorf("got error from osquery OS discovery: %s", err.Error())
 						}
 						logrus.Debugf("osquery OS info: %#v", osqOSInfo)
+						instanceModel.OsInfo = &model.OSInfo{
+							ID:             osqOSInfo.Name,
+							Version:        osqOSInfo.Version,
+							BuildVersion:   fmt.Sprintf("%v.%v.%v", osqOSInfo.Major, osqOSInfo.Minor, osqOSInfo.Patch),
+							Arch:           osqOSInfo.Arch,
+							PlatformDistro: osqOSInfo.Platform,
+							PlatformBase:   osqOSInfo.PlatformLike,
+						}
 						instanceModels = append(instanceModels, instanceModel)
 					}
 				}
