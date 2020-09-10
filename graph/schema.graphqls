@@ -40,6 +40,13 @@ type OSPackage {
   priority: String!
 }
 
+type ListeningApplication {
+  id: ID!
+  address: String!
+  port: String!
+  pid: String!
+}
+
 type Query {
   ec2Instances: [EC2Instance!]!
 }

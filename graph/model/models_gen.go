@@ -18,6 +18,13 @@ type EC2Instance struct {
 	OsPackages       []*OSPackage `json:"osPackages"`
 }
 
+type ListeningApplication struct {
+	ID      string `json:"id"`
+	Address string `json:"address"`
+	Port    string `json:"port"`
+	Pid     string `json:"pid"`
+}
+
 type OSInfo struct {
 	ID             string `json:"id"`
 	Version        string `json:"version"`
