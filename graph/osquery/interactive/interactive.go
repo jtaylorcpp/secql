@@ -139,7 +139,7 @@ func GetListeningApplications(client *hellossh.Client, osInfo OSInfo) ([]Listeni
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
 
-	err := client.Cmd(`osqueryi --json "select distinct process.name, listening.port, listening.address, process.pid from processes as process join listening_ports as listening on process.pid = listening.pid`).SetStdio(&stdout, &stderr).Run()
+	err := client.Cmd(`osqueryi --json "select distinct process.name, listening.port, listening.address, process.pid from processes as process join listening_ports as listening on process.pid = listening.pid"`).SetStdio(&stdout, &stderr).Run()
 	if err != nil {
 		logrus.Errorf("error when getting osquery package info: %s", err.Error())
 	}

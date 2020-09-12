@@ -12,6 +12,7 @@ type EC2Instance {
   osInfo: OSInfo!
   ami: AMI!
   osPackages: [OSPackage!]!
+  listeningApplications: [ListeningApplication!]!
 }
 
 type AMI {
