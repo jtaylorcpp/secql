@@ -12,6 +12,7 @@ type EC2Instance {
   osInfo: OSInfo!
   ami: AMI!
   osPackages: [OSPackage!]!
+  listeningApplications: [ListeningApplication!]!
 }
 
 type AMI {
@@ -38,6 +39,13 @@ type OSPackage {
   maintainer: String!
   section: String!
   priority: String!
+}
+
+type ListeningApplication {
+  id: ID!
+  address: String!
+  port: String!
+  pid: String!
 }
 
 type Query {

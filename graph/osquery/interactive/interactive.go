@@ -120,3 +120,41 @@ func GetPackages(client *hellossh.Client, osInfo OSInfo) ([]Package, error) {
 	}
 	return []Package{}, nil
 }
+
+type ListeningApplication struct {
+	Address string `json:"address`
+	Name    string `json:"name"`
+	Pid     string `json:"pid"`
+	Port    string `josn:"port"`
+}
+
+/*
+osqueryi --json "select distinct process.name, listening.port, listening.address, process.pid from processes as process join listening_ports as listening on process.pid = listening.pid limit 1"
+[
+  {"address":"127.0.0.1","name":"code","pid":"2207","port":"34797"}
+]
+*/
+func GetListeningApplications(client *hellossh.Client, osInfo OSInfo) ([]ListeningApplication, error) {
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	err := client.Cmd(`osqueryi --json "select distinct process.name, listening.port, listening.address, process.pid from processes as process join listening_ports as listening on process.pid = listening.pid"`).SetStdio(&stdout, &stderr).Run()
+	if err != nil {
+		logrus.Errorf("error when getting osquery package info: %s", err.Error())
+	}
+
+	logrus.Debugf("recieved from osquery listening processes command, out:(%s), err:(%s)", stdout.String(), stderr.String())
+
+	if stderr.String() != "" {
+		return []ListeningApplication{}, errors.New("recieved stderr from machine when running listening process list")
+	}
+
+	var listeningApps []ListeningApplication
+	err = json.Unmarshal(stdout.Bytes(), &listeningApps)
+	if err != nil {
+		return []ListeningApplication{}, err
+	}
+
+	return listeningApps, nil
+}

@@ -7,15 +7,23 @@ type Ami struct {
 }
 
 type EC2Instance struct {
-	ID               string       `json:"id"`
-	Public           bool         `json:"public"`
-	Name             string       `json:"name"`
-	PublicIP         string       `json:"publicIP"`
-	PrivateIP        string       `json:"privateIP"`
-	AvailabilityZone string       `json:"availabilityZone"`
-	OsInfo           *OSInfo      `json:"osInfo"`
-	Ami              *Ami         `json:"ami"`
-	OsPackages       []*OSPackage `json:"osPackages"`
+	ID                    string                  `json:"id"`
+	Public                bool                    `json:"public"`
+	Name                  string                  `json:"name"`
+	PublicIP              string                  `json:"publicIP"`
+	PrivateIP             string                  `json:"privateIP"`
+	AvailabilityZone      string                  `json:"availabilityZone"`
+	OsInfo                *OSInfo                 `json:"osInfo"`
+	Ami                   *Ami                    `json:"ami"`
+	OsPackages            []*OSPackage            `json:"osPackages"`
+	ListeningApplications []*ListeningApplication `json:"listeningApplications"`
+}
+
+type ListeningApplication struct {
+	ID      string `json:"id"`
+	Address string `json:"address"`
+	Port    string `json:"port"`
+	Pid     string `json:"pid"`
 }
 
 type OSInfo struct {

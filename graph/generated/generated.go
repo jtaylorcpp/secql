@@ -47,15 +47,23 @@ type ComplexityRoot struct {
 	}
 
 	EC2Instance struct {
-		Ami              func(childComplexity int) int
-		AvailabilityZone func(childComplexity int) int
-		ID               func(childComplexity int) int
-		Name             func(childComplexity int) int
-		OsInfo           func(childComplexity int) int
-		OsPackages       func(childComplexity int) int
-		PrivateIP        func(childComplexity int) int
-		Public           func(childComplexity int) int
-		PublicIP         func(childComplexity int) int
+		Ami                   func(childComplexity int) int
+		AvailabilityZone      func(childComplexity int) int
+		ID                    func(childComplexity int) int
+		ListeningApplications func(childComplexity int) int
+		Name                  func(childComplexity int) int
+		OsInfo                func(childComplexity int) int
+		OsPackages            func(childComplexity int) int
+		PrivateIP             func(childComplexity int) int
+		Public                func(childComplexity int) int
+		PublicIP              func(childComplexity int) int
+	}
+
+	ListeningApplication struct {
+		Address func(childComplexity int) int
+		ID      func(childComplexity int) int
+		Pid     func(childComplexity int) int
+		Port    func(childComplexity int) int
 	}
 
 	OSInfo struct {
@@ -132,6 +140,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.EC2Instance.ID(childComplexity), true
 
+	case "EC2Instance.listeningApplications":
+		if e.complexity.EC2Instance.ListeningApplications == nil {
+			break
+		}
+
+		return e.complexity.EC2Instance.ListeningApplications(childComplexity), true
+
 	case "EC2Instance.name":
 		if e.complexity.EC2Instance.Name == nil {
 			break
@@ -173,6 +188,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.EC2Instance.PublicIP(childComplexity), true
+
+	case "ListeningApplication.address":
+		if e.complexity.ListeningApplication.Address == nil {
+			break
+		}
+
+		return e.complexity.ListeningApplication.Address(childComplexity), true
+
+	case "ListeningApplication.id":
+		if e.complexity.ListeningApplication.ID == nil {
+			break
+		}
+
+		return e.complexity.ListeningApplication.ID(childComplexity), true
+
+	case "ListeningApplication.pid":
+		if e.complexity.ListeningApplication.Pid == nil {
+			break
+		}
+
+		return e.complexity.ListeningApplication.Pid(childComplexity), true
+
+	case "ListeningApplication.port":
+		if e.complexity.ListeningApplication.Port == nil {
+			break
+		}
+
+		return e.complexity.ListeningApplication.Port(childComplexity), true
 
 	case "OSInfo.arch":
 		if e.complexity.OSInfo.Arch == nil {
@@ -357,6 +400,7 @@ type EC2Instance {
   osInfo: OSInfo!
   ami: AMI!
   osPackages: [OSPackage!]!
+  listeningApplications: [ListeningApplication!]!
 }
 
 type AMI {
@@ -383,6 +427,13 @@ type OSPackage {
   maintainer: String!
   section: String!
   priority: String!
+}
+
+type ListeningApplication {
+  id: ID!
+  address: String!
+  port: String!
+  pid: String!
 }
 
 type Query {
@@ -783,6 +834,176 @@ func (ec *executionContext) _EC2Instance_osPackages(ctx context.Context, field g
 	res := resTmp.([]*model.OSPackage)
 	fc.Result = res
 	return ec.marshalNOSPackage2ᚕᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐOSPackageᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _EC2Instance_listeningApplications(ctx context.Context, field graphql.CollectedField, obj *model.EC2Instance) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "EC2Instance",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ListeningApplications, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ListeningApplication)
+	fc.Result = res
+	return ec.marshalNListeningApplication2ᚕᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐListeningApplicationᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ListeningApplication_id(ctx context.Context, field graphql.CollectedField, obj *model.ListeningApplication) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ListeningApplication",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ListeningApplication_address(ctx context.Context, field graphql.CollectedField, obj *model.ListeningApplication) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ListeningApplication",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Address, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ListeningApplication_port(ctx context.Context, field graphql.CollectedField, obj *model.ListeningApplication) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ListeningApplication",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Port, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ListeningApplication_pid(ctx context.Context, field graphql.CollectedField, obj *model.ListeningApplication) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ListeningApplication",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Pid, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _OSInfo_id(ctx context.Context, field graphql.CollectedField, obj *model.OSInfo) (ret graphql.Marshaler) {
@@ -2578,6 +2799,53 @@ func (ec *executionContext) _EC2Instance(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "listeningApplications":
+			out.Values[i] = ec._EC2Instance_listeningApplications(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var listeningApplicationImplementors = []string{"ListeningApplication"}
+
+func (ec *executionContext) _ListeningApplication(ctx context.Context, sel ast.SelectionSet, obj *model.ListeningApplication) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, listeningApplicationImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ListeningApplication")
+		case "id":
+			out.Values[i] = ec._ListeningApplication_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "address":
+			out.Values[i] = ec._ListeningApplication_address(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "port":
+			out.Values[i] = ec._ListeningApplication_port(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "pid":
+			out.Values[i] = ec._ListeningApplication_pid(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3093,6 +3361,57 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNListeningApplication2githubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐListeningApplication(ctx context.Context, sel ast.SelectionSet, v model.ListeningApplication) graphql.Marshaler {
+	return ec._ListeningApplication(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNListeningApplication2ᚕᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐListeningApplicationᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ListeningApplication) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNListeningApplication2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐListeningApplication(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNListeningApplication2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐListeningApplication(ctx context.Context, sel ast.SelectionSet, v *model.ListeningApplication) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ListeningApplication(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNOSInfo2githubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐOSInfo(ctx context.Context, sel ast.SelectionSet, v model.OSInfo) graphql.Marshaler {

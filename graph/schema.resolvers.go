@@ -128,6 +128,21 @@ func (r *queryResolver) Ec2Instances(ctx context.Context) ([]*model.EC2Instance,
 						}
 
 						instanceModel.OsPackages = packages
+
+						listeningApps, err := osquery.GetListeningApplications(sshClient, osqOSInfo)
+						if err != nil {
+							logrus.Errorf("got error from osquery listener discovery: %s", err.Error())
+						}
+						listeningApplications := make([]*model.ListeningApplication, len(listeningApps))
+						for idx, app := range listeningApps {
+							listeningApplications[idx] = &model.ListeningApplication{
+								ID:      app.Name,
+								Address: app.Address,
+								Port:    app.Port,
+								Pid:     app.Pid,
+							}
+						}
+						instanceModel.ListeningApplications = listeningApplications
 						instanceModels = append(instanceModels, instanceModel)
 					}
 				}
