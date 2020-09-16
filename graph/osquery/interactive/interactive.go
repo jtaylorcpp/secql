@@ -51,7 +51,7 @@ func GetOS(client *hellossh.Client) (OSInfo, error) {
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
 
-	err := client.Cmd(`osqueryi --json "select * from os_version"`).SetStdio(&stdout, &stderr).Run()
+	err := client.Cmd(`sudo osqueryi --json "select * from os_version"`).SetStdio(&stdout, &stderr).Run()
 
 	if err != nil {
 		logrus.Errorf("recieved error when getting OSInfo: %s", err.Error())
@@ -95,7 +95,7 @@ func GetPackages(client *hellossh.Client, osInfo OSInfo) ([]Package, error) {
 		var stdout bytes.Buffer
 		var stderr bytes.Buffer
 
-		err := client.Cmd(`osqueryi --json "select * from Deb_packages"`).SetStdio(&stdout, &stderr).Run()
+		err := client.Cmd(`sudo osqueryi --json "select * from Deb_packages"`).SetStdio(&stdout, &stderr).Run()
 		if err != nil {
 			logrus.Errorf("error when getting osquery package info: %s", err.Error())
 		}
