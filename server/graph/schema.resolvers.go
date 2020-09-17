@@ -11,13 +11,14 @@ import (
 	awsTypes "github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/jtaylorcpp/secql/graph/aws"
-	"github.com/jtaylorcpp/secql/graph/generated"
 	"github.com/jtaylorcpp/secql/graph/model"
 	osquery "github.com/jtaylorcpp/secql/graph/osquery/interactive"
+	generated1 "github.com/jtaylorcpp/secql/server/graph/generated"
+	model1 "github.com/jtaylorcpp/secql/server/graph/model"
 	"github.com/sirupsen/logrus"
 )
 
-func (r *queryResolver) Ec2Instances(ctx context.Context) ([]*model.EC2Instance, error) {
+func (r *queryResolver) Ec2Instances(ctx context.Context) ([]*model1.EC2Instance, error) {
 	logrus.SetLevel(logrus.DebugLevel)
 	logrus.Debugln("getting all ec2 instances")
 	regions, err := aws.GetAllRegions(r.Session)
@@ -155,7 +156,7 @@ func (r *queryResolver) Ec2Instances(ctx context.Context) ([]*model.EC2Instance,
 	return instanceModels, nil
 }
 
-// Query returns generated.QueryResolver implementation.
-func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
+// Query returns generated1.QueryResolver implementation.
+func (r *Resolver) Query() generated1.QueryResolver { return &queryResolver{r} }
 
 type queryResolver struct{ *Resolver }

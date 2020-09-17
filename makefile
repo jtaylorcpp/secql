@@ -1,4 +1,5 @@
-generate:
+generate-server:
+	cd server && \
 	go run github.com/99designs/gqlgen generate
 
 cli:
