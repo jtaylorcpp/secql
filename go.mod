@@ -5,6 +5,7 @@ go 1.14
 require (
 	github.com/99designs/gqlgen v0.11.3
 	github.com/aws/aws-sdk-go v1.34.9
+	github.com/gorilla/mux v1.6.1
 	github.com/helloyi/go-sshclient v0.0.0-20200729145748-988808eb5279
 	github.com/hpcloud/tail v1.0.0
 	github.com/sirupsen/logrus v1.6.0
