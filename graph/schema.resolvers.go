@@ -10,9 +10,9 @@ import (
 
 	awsTypes "github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/jtaylorcpp/secql/graph/aws"
+	"github.com/jtaylorcpp/secql/aws"
 	"github.com/jtaylorcpp/secql/graph/model"
-	osquery "github.com/jtaylorcpp/secql/graph/osquery/interactive"
+	osquery "github.com/jtaylorcpp/secql/osquery/interactive"
 	generated1 "github.com/jtaylorcpp/secql/server/graph/generated"
 	model1 "github.com/jtaylorcpp/secql/server/graph/model"
 	"github.com/sirupsen/logrus"
