@@ -23,7 +23,7 @@ var startCmd = &cobra.Command{
 
 		logrus.Infof("osqueryd config: %#v", config)
 
-		aggregator := &agent.Aggregator{Tables: map[string]interface{}{}}
+		aggregator := agent.NewAggregator()
 		signalChan := make(chan bool, 1)
 
 		logrus.Info("starting osquery result tailer")

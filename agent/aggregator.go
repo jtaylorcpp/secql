@@ -2,13 +2,19 @@ package agent
 
 import (
 	"encoding/json"
+	"fmt"
 
+	"github.com/jtaylorcpp/secql/graph/model"
 	"github.com/papertrail/go-tail/follower"
 	"github.com/sirupsen/logrus"
 )
 
 type Aggregator struct {
-	Tables map[string]Columns
+	Tables map[string]Table
+}
+
+type Table struct {
+	Rows []interface{}
 }
 
 /* osquery result line:
@@ -21,11 +27,23 @@ type OSQueryResultLine struct {
 	Columns        map[string]string
 }
 
-type Columns map[string]string
+func (o OSQueryResultLine) ParseColumns() (interface{}, error) {
+	switch o.Name {
+	case "listening_applications":
+		return model.ListeningApplication{
+			ID:      o.Columns["name"],
+			Address: o.Columns["address"],
+			Port:    o.Columns["port"],
+			Pid:     o.Columns["pid"],
+		}, nil
+	}
+
+	return nil, fmt.Errorf("no OSQuery model parsed for log %v", o.Name)
+}
 
 func NewAggregator() *Aggregator {
 	return &Aggregator{
-		Tables: make(map[string]Columns, 0),
+		Tables: make(map[string]Table, 0),
 	}
 }
 
@@ -36,9 +54,34 @@ func (a *Aggregator) OSQueryHandler(line follower.Line) error {
 		return err
 	}
 	logrus.Infof("aggregator recieved line: %#v", result)
+	if _, ok := a.Tables[result.Name]; !ok {
+		a.Tables[result.Name] = Table{Rows: make([]interface{}, 0)}
+	}
 
-	if result.Action == "added" {
-		a.Tables[result.Name] = result.Columns
+	resultInterface, err := result.ParseColumns()
+	if err != nil {
+		logrus.Errorf("error parsing row for OSQuery result %s", result.Name)
+	}
+	switch result.Name {
+	case "listening_applications":
+		if result.Action == "added" {
+			resultRow := resultInterface.(model.ListeningApplication)
+			insertIndex := -1
+			for idx, rowInterface := range a.Tables[result.Name].Rows {
+				row := rowInterface.(model.ListeningApplication)
+				if row.ID == resultRow.ID {
+					insertIndex = idx
+					break
+				}
+			}
+			table := a.Tables[result.Name]
+			if insertIndex < 0 {
+				table.Rows = append(table.Rows, resultRow)
+			} else {
+				table.Rows[insertIndex] = resultRow
+			}
+			a.Tables[result.Name] = table
+		}
 	}
 	return nil
 }
