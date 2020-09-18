@@ -4,21 +4,33 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
-func StartServer(osqConfig *OSQueryConfig) error {
-	metricMux := mux.NewRouter()
-	aggregator := &Aggregator{Tables: map[string]interface{}{}}
+func StartServer(osqConfig *OSQueryConfig, aggregator *Aggregator) error {
+	router := mux.NewRouter()
 	for query, _ := range osqConfig.Schedule {
-		metricMux.HandleFunc(fmt.Sprintf("/%s", query), newHandler(query, aggregator))
+		logrus.Infof("adding in route for osquery query %s", query)
+		router.HandleFunc(fmt.Sprintf("/%s", query), newHandler(query, aggregator))
 	}
-	return nil
+
+	srv := &http.Server{
+		Handler: router,
+		Addr:    "127.0.0.1:8000",
+		// Good practice: enforce timeouts for servers you create!
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
+
+	return srv.ListenAndServe()
 }
 
 func newHandler(metricsKey string, aggregator *Aggregator) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		logrus.Infof("API request for metrics path: %v", *r.URL)
 		if data, ok := aggregator.Tables[metricsKey]; ok {
 			json.NewEncoder(w).Encode(data)
 		}

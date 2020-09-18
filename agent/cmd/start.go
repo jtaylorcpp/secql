@@ -22,5 +22,17 @@ var startCmd = &cobra.Command{
 		}
 
 		logrus.Infof("osqueryd config: %#v", config)
+
+		aggregator := &agent.Aggregator{Tables: map[string]interface{}{}}
+		signalChan := make(chan bool, 1)
+
+		logrus.Info("starting osquery result tailer")
+		go func() {
+			logrus.Info(agent.StartTailOSQueryResult(osqueryResults, aggregator.OSQueryHandler, signalChan))
+		}()
+		logrus.Info("starting server")
+		logrus.Info(agent.StartServer(config, aggregator))
+		// close out tailer
+		signalChan <- true
 	},
 }

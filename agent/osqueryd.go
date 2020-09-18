@@ -2,29 +2,37 @@ package agent
 
 import (
 	"encoding/json"
+	"io"
 	"io/ioutil"
 
-	"github.com/hpcloud/tail"
+	"github.com/papertrail/go-tail/follower"
+	"github.com/sirupsen/logrus"
 )
 
-func StartTailOSQueryResult(resultFilePath string, handler func(*tail.Line) error, signal chan bool) error {
-	fileTail, err := tail.TailFile(resultFilePath, tail.Config{Follow: true})
+func StartTailOSQueryResult(resultFilePath string, handler func(follower.Line) error, signal chan bool) error {
+	logrus.Infof("starting osquery result tailer for result file: %s", resultFilePath)
+	fileTail, err := follower.New(resultFilePath, follower.Config{
+		Whence: io.SeekStart,
+		Offset: 0,
+		Reopen: true,
+	})
+
 	if err != nil {
-		return nil
+		return err
 	}
 
 	for {
 		select {
-		case line := <-fileTail.Lines:
-			err = handler(line)
-			if err != nil {
-				fileTail.Stop()
-				fileTail.Cleanup()
-				panic(err)
+		case line := <-fileTail.Lines():
+			logrus.Info("recieved new osquery line")
+			handlerError := handler(line)
+			logrus.Info("handler called")
+			if handlerError != nil {
+				fileTail.Close()
+				panic(handlerError)
 			}
 		case <-signal:
-			fileTail.Stop()
-			fileTail.Cleanup()
+			fileTail.Close()
 			return nil
 		}
 	}
