@@ -62,6 +62,14 @@ type OSQueryConfig struct {
 		Query    string `json:"query"`
 		Interval int    `json:"interval"`
 	} `json:"schedule"`
+	Packs map[string]struct {
+		Discovery []string `json:"discovery"`
+		Platform  string   `json:"platform"`
+		Queries   map[string]struct {
+			Query    string `json:"query"`
+			Interval int    `json:"interval"`
+		} `json:"queries"`
+	} `json:"packs"`
 }
 
 func DiscoverOSQueryConfig(configFilePath string) (*OSQueryConfig, error) {

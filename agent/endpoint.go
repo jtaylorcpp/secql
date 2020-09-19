@@ -12,7 +12,19 @@ import (
 
 func StartServer(osqConfig *OSQueryConfig, aggregator *Aggregator) error {
 	router := mux.NewRouter()
+
+	routeMap := map[string]bool{}
 	for query, _ := range osqConfig.Schedule {
+		routeMap[query] = true
+	}
+
+	for _, pack := range osqConfig.Packs {
+		for query, _ := range pack.Queries {
+			routeMap[query] = true
+		}
+	}
+
+	for query, _ := range routeMap {
 		logrus.Infof("adding in route for osquery query %s", query)
 		router.HandleFunc(fmt.Sprintf("/%s", query), newHandler(query, aggregator))
 	}

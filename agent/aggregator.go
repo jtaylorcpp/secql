@@ -45,8 +45,19 @@ func (o OSQueryResultLine) ParseColumns() (interface{}, error) {
 			PlatformDistro: o.Columns["platform"],
 			PlatformBase:   o.Columns["platform_like"],
 		}, nil
-	case "debian_os_packages":
-		return model.OSPackage{}
+	case "pack_debian_os_packages":
+		return model.OSPackage{
+			ID:         o.Columns["name"],
+			Version:    o.Columns["version"],
+			Source:     o.Columns["source"],
+			Size:       o.Columns["size"],
+			Arch:       o.Columns["arch"],
+			Revision:   o.Columns["revision"],
+			Status:     o.Columns["status"],
+			Maintainer: o.Columns["maintainer"],
+			Section:    o.Columns["section"],
+			Priority:   o.Columns["priority"],
+		}, nil
 	}
 
 	return nil, fmt.Errorf("no OSQuery model parsed for log %v", o.Name)
@@ -58,12 +69,27 @@ func NewAggregator() *Aggregator {
 	}
 }
 
-func (a *Aggregator) OSQueryHandler(line follower.Line) error {
+func OSQueryResultFromLine(line follower.Line) (*OSQueryResultLine, error) {
 	var result OSQueryResultLine
 	err := json.Unmarshal(line.Bytes(), &result)
 	if err != nil {
+		return nil, err
+	}
+
+	switch result.Name {
+	case "debian_os_packages":
+		result.Name = "os_packages"
+	}
+
+	return &result, nil
+}
+
+func (a *Aggregator) OSQueryHandler(line follower.Line) error {
+	result, err := OSQueryResultFromLine(line)
+	if err != nil {
 		return err
 	}
+
 	logrus.Infof("aggregator recieved line: %#v", result)
 	if _, ok := a.Tables[result.Name]; !ok {
 		a.Tables[result.Name] = Table{Rows: make([]interface{}, 0)}
