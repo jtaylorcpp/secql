@@ -36,6 +36,17 @@ func (o OSQueryResultLine) ParseColumns() (interface{}, error) {
 			Port:    o.Columns["port"],
 			Pid:     o.Columns["pid"],
 		}, nil
+	case "os_info":
+		return model.OSInfo{
+			ID:             o.Columns["name"],
+			Version:        o.Columns["version"],
+			BuildVersion:   fmt.Sprintf("%s.%s.%s", o.Columns["major"], o.Columns["minor"], o.Columns["patch"]),
+			Arch:           o.Columns["arch"],
+			PlatformDistro: o.Columns["platform"],
+			PlatformBase:   o.Columns["platform_like"],
+		}, nil
+	case "debian_os_packages":
+		return model.OSPackage{}
 	}
 
 	return nil, fmt.Errorf("no OSQuery model parsed for log %v", o.Name)
@@ -81,6 +92,26 @@ func (a *Aggregator) OSQueryHandler(line follower.Line) error {
 				table.Rows[insertIndex] = resultRow
 			}
 			a.Tables[result.Name] = table
+		}
+	case "os_info":
+		if result.Action == "added" {
+			resultRow := resultInterface.(model.OSInfo)
+			insertIndex := -1
+			for idx, rowInterface := range a.Tables[result.Name].Rows {
+				row := rowInterface.(model.OSInfo)
+				if row.ID == resultRow.ID {
+					insertIndex = idx
+					break
+				}
+			}
+			table := a.Tables[result.Name]
+			if insertIndex < 0 {
+				table.Rows = append(table.Rows, resultRow)
+			} else {
+				table.Rows[insertIndex] = resultRow
+			}
+			a.Tables[result.Name] = table
+
 		}
 	}
 	return nil
