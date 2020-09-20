@@ -12,7 +12,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/jtaylorcpp/secql/server/graph/model"
+	"github.com/jtaylorcpp/secql/graph/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -765,7 +765,7 @@ func (ec *executionContext) _EC2Instance_osInfo(ctx context.Context, field graph
 	}
 	res := resTmp.(*model.OSInfo)
 	fc.Result = res
-	return ec.marshalNOSInfo2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋserverᚋgraphᚋmodelᚐOSInfo(ctx, field.Selections, res)
+	return ec.marshalNOSInfo2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐOSInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _EC2Instance_ami(ctx context.Context, field graphql.CollectedField, obj *model.EC2Instance) (ret graphql.Marshaler) {
@@ -799,7 +799,7 @@ func (ec *executionContext) _EC2Instance_ami(ctx context.Context, field graphql.
 	}
 	res := resTmp.(*model.Ami)
 	fc.Result = res
-	return ec.marshalNAMI2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋserverᚋgraphᚋmodelᚐAmi(ctx, field.Selections, res)
+	return ec.marshalNAMI2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐAmi(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _EC2Instance_osPackages(ctx context.Context, field graphql.CollectedField, obj *model.EC2Instance) (ret graphql.Marshaler) {
@@ -833,7 +833,7 @@ func (ec *executionContext) _EC2Instance_osPackages(ctx context.Context, field g
 	}
 	res := resTmp.([]*model.OSPackage)
 	fc.Result = res
-	return ec.marshalNOSPackage2ᚕᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋserverᚋgraphᚋmodelᚐOSPackageᚄ(ctx, field.Selections, res)
+	return ec.marshalNOSPackage2ᚕᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐOSPackageᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _EC2Instance_listeningApplications(ctx context.Context, field graphql.CollectedField, obj *model.EC2Instance) (ret graphql.Marshaler) {
@@ -867,7 +867,7 @@ func (ec *executionContext) _EC2Instance_listeningApplications(ctx context.Conte
 	}
 	res := resTmp.([]*model.ListeningApplication)
 	fc.Result = res
-	return ec.marshalNListeningApplication2ᚕᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋserverᚋgraphᚋmodelᚐListeningApplicationᚄ(ctx, field.Selections, res)
+	return ec.marshalNListeningApplication2ᚕᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐListeningApplicationᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ListeningApplication_id(ctx context.Context, field graphql.CollectedField, obj *model.ListeningApplication) (ret graphql.Marshaler) {
@@ -1581,7 +1581,7 @@ func (ec *executionContext) _Query_ec2Instances(ctx context.Context, field graph
 	}
 	res := resTmp.([]*model.EC2Instance)
 	fc.Result = res
-	return ec.marshalNEC2Instance2ᚕᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋserverᚋgraphᚋmodelᚐEC2Instanceᚄ(ctx, field.Selections, res)
+	return ec.marshalNEC2Instance2ᚕᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐEC2Instanceᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3270,11 +3270,11 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNAMI2githubᚗcomᚋjtaylorcppᚋsecqlᚋserverᚋgraphᚋmodelᚐAmi(ctx context.Context, sel ast.SelectionSet, v model.Ami) graphql.Marshaler {
+func (ec *executionContext) marshalNAMI2githubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐAmi(ctx context.Context, sel ast.SelectionSet, v model.Ami) graphql.Marshaler {
 	return ec._AMI(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAMI2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋserverᚋgraphᚋmodelᚐAmi(ctx context.Context, sel ast.SelectionSet, v *model.Ami) graphql.Marshaler {
+func (ec *executionContext) marshalNAMI2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐAmi(ctx context.Context, sel ast.SelectionSet, v *model.Ami) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -3298,11 +3298,11 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNEC2Instance2githubᚗcomᚋjtaylorcppᚋsecqlᚋserverᚋgraphᚋmodelᚐEC2Instance(ctx context.Context, sel ast.SelectionSet, v model.EC2Instance) graphql.Marshaler {
+func (ec *executionContext) marshalNEC2Instance2githubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐEC2Instance(ctx context.Context, sel ast.SelectionSet, v model.EC2Instance) graphql.Marshaler {
 	return ec._EC2Instance(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNEC2Instance2ᚕᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋserverᚋgraphᚋmodelᚐEC2Instanceᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.EC2Instance) graphql.Marshaler {
+func (ec *executionContext) marshalNEC2Instance2ᚕᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐEC2Instanceᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.EC2Instance) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3326,7 +3326,7 @@ func (ec *executionContext) marshalNEC2Instance2ᚕᚖgithubᚗcomᚋjtaylorcpp�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNEC2Instance2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋserverᚋgraphᚋmodelᚐEC2Instance(ctx, sel, v[i])
+			ret[i] = ec.marshalNEC2Instance2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐEC2Instance(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3339,7 +3339,7 @@ func (ec *executionContext) marshalNEC2Instance2ᚕᚖgithubᚗcomᚋjtaylorcpp�
 	return ret
 }
 
-func (ec *executionContext) marshalNEC2Instance2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋserverᚋgraphᚋmodelᚐEC2Instance(ctx context.Context, sel ast.SelectionSet, v *model.EC2Instance) graphql.Marshaler {
+func (ec *executionContext) marshalNEC2Instance2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐEC2Instance(ctx context.Context, sel ast.SelectionSet, v *model.EC2Instance) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -3363,11 +3363,11 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) marshalNListeningApplication2githubᚗcomᚋjtaylorcppᚋsecqlᚋserverᚋgraphᚋmodelᚐListeningApplication(ctx context.Context, sel ast.SelectionSet, v model.ListeningApplication) graphql.Marshaler {
+func (ec *executionContext) marshalNListeningApplication2githubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐListeningApplication(ctx context.Context, sel ast.SelectionSet, v model.ListeningApplication) graphql.Marshaler {
 	return ec._ListeningApplication(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNListeningApplication2ᚕᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋserverᚋgraphᚋmodelᚐListeningApplicationᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ListeningApplication) graphql.Marshaler {
+func (ec *executionContext) marshalNListeningApplication2ᚕᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐListeningApplicationᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ListeningApplication) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3391,7 +3391,7 @@ func (ec *executionContext) marshalNListeningApplication2ᚕᚖgithubᚗcomᚋjt
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNListeningApplication2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋserverᚋgraphᚋmodelᚐListeningApplication(ctx, sel, v[i])
+			ret[i] = ec.marshalNListeningApplication2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐListeningApplication(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3404,7 +3404,7 @@ func (ec *executionContext) marshalNListeningApplication2ᚕᚖgithubᚗcomᚋjt
 	return ret
 }
 
-func (ec *executionContext) marshalNListeningApplication2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋserverᚋgraphᚋmodelᚐListeningApplication(ctx context.Context, sel ast.SelectionSet, v *model.ListeningApplication) graphql.Marshaler {
+func (ec *executionContext) marshalNListeningApplication2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐListeningApplication(ctx context.Context, sel ast.SelectionSet, v *model.ListeningApplication) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -3414,11 +3414,11 @@ func (ec *executionContext) marshalNListeningApplication2ᚖgithubᚗcomᚋjtayl
 	return ec._ListeningApplication(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNOSInfo2githubᚗcomᚋjtaylorcppᚋsecqlᚋserverᚋgraphᚋmodelᚐOSInfo(ctx context.Context, sel ast.SelectionSet, v model.OSInfo) graphql.Marshaler {
+func (ec *executionContext) marshalNOSInfo2githubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐOSInfo(ctx context.Context, sel ast.SelectionSet, v model.OSInfo) graphql.Marshaler {
 	return ec._OSInfo(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNOSInfo2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋserverᚋgraphᚋmodelᚐOSInfo(ctx context.Context, sel ast.SelectionSet, v *model.OSInfo) graphql.Marshaler {
+func (ec *executionContext) marshalNOSInfo2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐOSInfo(ctx context.Context, sel ast.SelectionSet, v *model.OSInfo) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -3428,11 +3428,11 @@ func (ec *executionContext) marshalNOSInfo2ᚖgithubᚗcomᚋjtaylorcppᚋsecql�
 	return ec._OSInfo(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNOSPackage2githubᚗcomᚋjtaylorcppᚋsecqlᚋserverᚋgraphᚋmodelᚐOSPackage(ctx context.Context, sel ast.SelectionSet, v model.OSPackage) graphql.Marshaler {
+func (ec *executionContext) marshalNOSPackage2githubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐOSPackage(ctx context.Context, sel ast.SelectionSet, v model.OSPackage) graphql.Marshaler {
 	return ec._OSPackage(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNOSPackage2ᚕᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋserverᚋgraphᚋmodelᚐOSPackageᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.OSPackage) graphql.Marshaler {
+func (ec *executionContext) marshalNOSPackage2ᚕᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐOSPackageᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.OSPackage) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3456,7 +3456,7 @@ func (ec *executionContext) marshalNOSPackage2ᚕᚖgithubᚗcomᚋjtaylorcppᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNOSPackage2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋserverᚋgraphᚋmodelᚐOSPackage(ctx, sel, v[i])
+			ret[i] = ec.marshalNOSPackage2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐOSPackage(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3469,7 +3469,7 @@ func (ec *executionContext) marshalNOSPackage2ᚕᚖgithubᚗcomᚋjtaylorcppᚋ
 	return ret
 }
 
-func (ec *executionContext) marshalNOSPackage2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋserverᚋgraphᚋmodelᚐOSPackage(ctx context.Context, sel ast.SelectionSet, v *model.OSPackage) graphql.Marshaler {
+func (ec *executionContext) marshalNOSPackage2ᚖgithubᚗcomᚋjtaylorcppᚋsecqlᚋgraphᚋmodelᚐOSPackage(ctx context.Context, sel ast.SelectionSet, v *model.OSPackage) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")

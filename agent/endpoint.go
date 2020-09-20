@@ -44,7 +44,11 @@ func newHandler(metricsKey string, aggregator *Aggregator) func(w http.ResponseW
 	return func(w http.ResponseWriter, r *http.Request) {
 		logrus.Infof("API request for metrics path: %v", *r.URL)
 		if data, ok := aggregator.Tables[metricsKey]; ok {
-			json.NewEncoder(w).Encode(data)
+			encoder := json.NewEncoder(w)
+			encoder.SetIndent("", "\t")
+			encoder.Encode(data.Rows)
+		} else {
+			logrus.Infof("handler path %s doesnt have any records", metricsKey)
 		}
 	}
 }

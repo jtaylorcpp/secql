@@ -45,7 +45,7 @@ func (o OSQueryResultLine) ParseColumns() (interface{}, error) {
 			PlatformDistro: o.Columns["platform"],
 			PlatformBase:   o.Columns["platform_like"],
 		}, nil
-	case "pack_debian_os_packages":
+	case "os_packages":
 		return model.OSPackage{
 			ID:         o.Columns["name"],
 			Version:    o.Columns["version"],
@@ -70,28 +70,31 @@ func NewAggregator() *Aggregator {
 }
 
 func OSQueryResultFromLine(line follower.Line) (*OSQueryResultLine, error) {
-	var result OSQueryResultLine
+	var result *OSQueryResultLine
 	err := json.Unmarshal(line.Bytes(), &result)
 	if err != nil {
 		return nil, err
 	}
 
 	switch result.Name {
-	case "debian_os_packages":
+	case "pack_debian_os_packages":
 		result.Name = "os_packages"
 	}
 
-	return &result, nil
+	logrus.Infof("osquery parsed result line: %#v", result)
+	return result, nil
 }
 
 func (a *Aggregator) OSQueryHandler(line follower.Line) error {
 	result, err := OSQueryResultFromLine(line)
 	if err != nil {
-		return err
+		logrus.Errorf(err.Error())
+		return nil
 	}
 
 	logrus.Infof("aggregator recieved line: %#v", result)
 	if _, ok := a.Tables[result.Name]; !ok {
+		logrus.Infof("creating new aggregator table for key %s", result.Name)
 		a.Tables[result.Name] = Table{Rows: make([]interface{}, 0)}
 	}
 
@@ -99,46 +102,56 @@ func (a *Aggregator) OSQueryHandler(line follower.Line) error {
 	if err != nil {
 		logrus.Errorf("error parsing row for OSQuery result %s", result.Name)
 	}
+
+	insertIndex := -1
+	table := a.Tables[result.Name]
 	switch result.Name {
 	case "listening_applications":
-		if result.Action == "added" {
-			resultRow := resultInterface.(model.ListeningApplication)
-			insertIndex := -1
-			for idx, rowInterface := range a.Tables[result.Name].Rows {
-				row := rowInterface.(model.ListeningApplication)
-				if row.ID == resultRow.ID {
-					insertIndex = idx
-					break
-				}
+		resultRow := resultInterface.(model.ListeningApplication)
+		for idx, rowInterface := range table.Rows {
+			row := rowInterface.(model.ListeningApplication)
+			if row.ID == resultRow.ID {
+				insertIndex = idx
+				break
 			}
-			table := a.Tables[result.Name]
-			if insertIndex < 0 {
-				table.Rows = append(table.Rows, resultRow)
-			} else {
-				table.Rows[insertIndex] = resultRow
-			}
-			a.Tables[result.Name] = table
 		}
-	case "os_info":
-		if result.Action == "added" {
-			resultRow := resultInterface.(model.OSInfo)
-			insertIndex := -1
-			for idx, rowInterface := range a.Tables[result.Name].Rows {
-				row := rowInterface.(model.OSInfo)
-				if row.ID == resultRow.ID {
-					insertIndex = idx
-					break
-				}
-			}
-			table := a.Tables[result.Name]
-			if insertIndex < 0 {
-				table.Rows = append(table.Rows, resultRow)
-			} else {
-				table.Rows[insertIndex] = resultRow
-			}
-			a.Tables[result.Name] = table
 
+	case "os_info":
+		resultRow := resultInterface.(model.OSInfo)
+		for idx, rowInterface := range table.Rows {
+			row := rowInterface.(model.OSInfo)
+			if row.ID == resultRow.ID {
+				insertIndex = idx
+				break
+			}
+		}
+
+	case "os_packages":
+		resultRow := resultInterface.(model.OSPackage)
+		for idx, rowInterface := range a.Tables[result.Name].Rows {
+			row := rowInterface.(model.OSPackage)
+			if row.ID == resultRow.ID {
+				insertIndex = idx
+				break
+			}
 		}
 	}
+	switch result.Action {
+	case "added":
+		if insertIndex >= 0 {
+			table.Rows[insertIndex] = resultInterface
+		} else {
+			table.Rows = append(table.Rows, resultInterface)
+		}
+	case "removed":
+		// do nothing if no record matched and we get a remove event
+		if insertIndex >= 0 {
+			table.Rows[insertIndex] = table.Rows[len(table.Rows)-1]
+			table.Rows[len(table.Rows)-1] = nil
+			table.Rows = table.Rows[:len(table.Rows)-1]
+		}
+	}
+
+	a.Tables[result.Name] = table
 	return nil
 }

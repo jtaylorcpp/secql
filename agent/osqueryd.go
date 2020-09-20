@@ -82,3 +82,15 @@ func DiscoverOSQueryConfig(configFilePath string) (*OSQueryConfig, error) {
 	err = json.Unmarshal(fileBytes, &config)
 	return &config, err
 }
+
+func OSQueryIsInstaled() bool {
+	return false
+}
+
+func GetDefaultOSQuerydConfig() string {
+	return ""
+}
+
+func InstallDefaultOSQuerydConfig() error {
+	return nil
+}
