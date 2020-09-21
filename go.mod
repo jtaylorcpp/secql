@@ -8,6 +8,7 @@ require (
 	github.com/gorilla/mux v1.6.1
 	github.com/helloyi/go-sshclient v0.0.0-20200729145748-988808eb5279
 	github.com/hpcloud/tail v1.0.0
+	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/papertrail/go-tail v0.0.0-20180509224916-973c153b0431
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/cobra v1.0.0
