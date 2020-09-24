@@ -52,10 +52,42 @@ func (c *Client) GetOSInfo() (model.OSInfo, error) {
 	return model.OSInfo{}, nil
 }
 
-func GetOSPackages() ([]model.OSPackage, error) {
-	return []model.OSPackage{}, nil
+func (c *Client) GetOSPackages() ([]model.OSPackage, error) {
+	resp, err := c.httpClient.Get(c.host + "/os_packages")
+	if err != nil {
+		return []model.OSPackage{}, err
+	}
+
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return []model.OSPackage{}, err
+	}
+
+	var osPackages []model.OSPackage
+	err = json.Unmarshal(bodyBytes, &osPackages)
+	if err != nil {
+		return []model.OSPackage{}, err
+	}
+
+	return osPackages, nil
 }
 
-func GetListeningApplications() ([]model.ListeningApplication, error) {
-	return []model.ListeningApplication{}, nil
+func (c *Client) GetListeningApplications() ([]model.ListeningApplication, error) {
+	resp, err := c.httpClient.Get(c.host + "/listening_applications")
+	if err != nil {
+		return []model.ListeningApplication{}, err
+	}
+
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return []model.ListeningApplication{}, err
+	}
+
+	var listeningApps []model.ListeningApplication
+	err = json.Unmarshal(bodyBytes, &listeningApps)
+	if err != nil {
+		return []model.ListeningApplication{}, err
+	}
+
+	return listeningApps, nil
 }
