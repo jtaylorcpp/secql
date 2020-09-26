@@ -20,7 +20,7 @@ type Client struct {
 }
 
 func (c *Client) New(opts *osquery.ClientOpts) (c *Client, error) {
-	
+	opts.EC2Instance
 }
 
 // osqueryi --json "select * from os_version"
