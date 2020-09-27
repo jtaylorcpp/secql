@@ -25,17 +25,8 @@ type Client struct {
 }
 
 func (c *Client) New(opts *osquery.ClientOpts) (*Client, error) {
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-	regionalSess := aws.GetRegionalSession(sess, opts.EC2Instance.Region)
-	sshClient, err := aws.NewEC2SSHSession(regioanlSess, optsEC2Instance)
-	if err != nil {
-		return nil, err
-	}
-
 	client := &Client{
-		sshClient: sshClient,
+		sshClient: opts.SSHClient,
 	}
 
 	info, err := c.GetOSInfo

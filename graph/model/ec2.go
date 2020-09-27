@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/jtaylorcpp/secql/osquery"
+	hellossh "github.com/helloyi/go-sshclient"
 )
 
 type EC2Instance struct {
@@ -12,5 +12,5 @@ type EC2Instance struct {
 	PrivateIP        string `json:"privateIP"`
 	AvailabilityZone string `json:"availabilityZone"`
 	Ami              *Ami   `json:"ami"`
-	OSQueryClient    *osquery.Client
+	SSHClient        *hellossh.Client
 }

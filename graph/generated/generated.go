@@ -95,6 +95,8 @@ type ComplexityRoot struct {
 }
 
 type EC2InstanceResolver interface {
+	OsInfo(ctx context.Context, obj *model.EC2Instance) (*model.OSInfo, error)
+
 	OsPackages(ctx context.Context, obj *model.EC2Instance) ([]*model.OSPackage, error)
 	ListeningApplications(ctx context.Context, obj *model.EC2Instance) ([]*model.ListeningApplication, error)
 }
@@ -750,13 +752,13 @@ func (ec *executionContext) _EC2Instance_osInfo(ctx context.Context, field graph
 		Object:   "EC2Instance",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.OsInfo, nil
+		return ec.resolvers.EC2Instance().OsInfo(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2790,10 +2792,19 @@ func (ec *executionContext) _EC2Instance(ctx context.Context, sel ast.SelectionS
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "osInfo":
-			out.Values[i] = ec._EC2Instance_osInfo(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._EC2Instance_osInfo(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "ami":
 			out.Values[i] = ec._EC2Instance_ami(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

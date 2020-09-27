@@ -13,6 +13,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+func (r *eC2InstanceResolver) OsInfo(ctx context.Context, obj *model.EC2Instance) (*model.OSInfo, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *eC2InstanceResolver) OsPackages(ctx context.Context, obj *model.EC2Instance) ([]*model.OSPackage, error) {
 	panic(fmt.Errorf("not implemented"))
 }
@@ -42,26 +46,7 @@ func (r *queryResolver) Ec2Instances(ctx context.Context) ([]*model.EC2Instance,
 		if err != nil {
 			logrus.Errorf("error in region %s: %s", region, err.Error())
 		}
-		for _, instance := range instances {
-			clientOpts := &osquery.ClientOpts{
-				EC2Instance = instance,
-			}
-
-			if instance.Public {
-				clientOpts.Host := fmt.Sprintf("http://%s:8000", instance.PublicIP)
-			} else {
-				clientOpts.Host := fmt.Sprintf("http://%s:8000", instance.PrivateIP)
-			}
-
-			osqueryClient, err := osquery.NewClient(clientOpts)
-			if err != nil {
-				logrus.Errorf("no osquery client for instance %v: %v",instance.ID, err.Error())
-				continue
-			}
-
-			instance.OSQueryClient = osqueryClient
-			instanceModels = append(instanceModels, instance)
-		}
+		instanceModels = append(instanceModels, instances...)
 	}
 	return instanceModels, nil
 }
