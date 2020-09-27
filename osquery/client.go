@@ -1,9 +1,10 @@
 package osquery
 
 import (
+	"github.com/jtaylorcpp/secql/agent"
 	"github.com/jtaylorcpp/secql/graph/model"
-	"github.com/jtaylorcpp/secql/osquery/passive/agent"
-	"github.com/sirupsen/logrus"
+	"github.com/jtaylorcpp/secql/osquery/interactive"
+	"github.com/sirupsen/logrus "
 )
 
 type Client interface {
@@ -24,13 +25,20 @@ func NewClient(opts *ClientOpts) (Client, error) {
 		agentClient, err := &agent.Client{}.New(opts)
 		if err != nil {
 			logrus.Errorf("error getting agent client: %v", err.Error())
-		}
+		} else {
 		return agentClient, err
+		}
 	}
 
 	if opts.EC2Instance != nil {
 		// try interactive ssh
+		interactiveClient, err := &interactive.Client{}.New(opts)
+		if err != nil {
+			logrus.Errorf("error getting interactive client: %v", err.Error())
+		} else {
+		return interactiveClient, err
+		}
 	}
 
-	return nil, nil
+	return nil, errors.New("no client configured")
 }

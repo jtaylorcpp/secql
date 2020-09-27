@@ -1,10 +1,3 @@
-package passive
-
-import (
-	"github.com/jtaylorcpp/secql/agent"
-	"github.com/jtaylorcpp/secql/osquery"
-)
-
 package agent
 
 import (
@@ -14,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jtaylorcpp/secql/graph/model"
+	"github.com/jtaylorcpp/secql/osquery"
 )
 
 type Client struct {

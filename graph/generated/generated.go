@@ -35,6 +35,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	EC2Instance() EC2InstanceResolver
 	Query() QueryResolver
 }
 
@@ -93,6 +94,10 @@ type ComplexityRoot struct {
 	}
 }
 
+type EC2InstanceResolver interface {
+	OsPackages(ctx context.Context, obj *model.EC2Instance) ([]*model.OSPackage, error)
+	ListeningApplications(ctx context.Context, obj *model.EC2Instance) ([]*model.ListeningApplication, error)
+}
 type QueryResolver interface {
 	Ec2Instances(ctx context.Context) ([]*model.EC2Instance, error)
 }
@@ -813,13 +818,13 @@ func (ec *executionContext) _EC2Instance_osPackages(ctx context.Context, field g
 		Object:   "EC2Instance",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.OsPackages, nil
+		return ec.resolvers.EC2Instance().OsPackages(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -847,13 +852,13 @@ func (ec *executionContext) _EC2Instance_listeningApplications(ctx context.Conte
 		Object:   "EC2Instance",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ListeningApplications, nil
+		return ec.resolvers.EC2Instance().ListeningApplications(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2757,53 +2762,71 @@ func (ec *executionContext) _EC2Instance(ctx context.Context, sel ast.SelectionS
 		case "id":
 			out.Values[i] = ec._EC2Instance_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "public":
 			out.Values[i] = ec._EC2Instance_public(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
 			out.Values[i] = ec._EC2Instance_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "publicIP":
 			out.Values[i] = ec._EC2Instance_publicIP(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "privateIP":
 			out.Values[i] = ec._EC2Instance_privateIP(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "availabilityZone":
 			out.Values[i] = ec._EC2Instance_availabilityZone(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "osInfo":
 			out.Values[i] = ec._EC2Instance_osInfo(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "ami":
 			out.Values[i] = ec._EC2Instance_ami(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "osPackages":
-			out.Values[i] = ec._EC2Instance_osPackages(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._EC2Instance_osPackages(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "listeningApplications":
-			out.Values[i] = ec._EC2Instance_listeningApplications(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._EC2Instance_listeningApplications(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
