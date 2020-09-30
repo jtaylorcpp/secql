@@ -10,7 +10,6 @@ import (
 	hellossh "github.com/helloyi/go-sshclient"
 	"github.com/jtaylorcpp/secql/aws"
 	"github.com/jtaylorcpp/secql/graph/model"
-	osquery "github.com/jtaylorcpp/secql/osquery/types"
 	"github.com/sirupsen/logrus"
 )
 
@@ -19,27 +18,40 @@ func init() {
 	logrus.SetReportCaller(true)
 }
 
-type Client struct {
+type SSHClient struct {
 	sshClient *hellossh.Client
-	info      types.OSInfo
+	info      model.OSInfo
 }
 
-func (c *Client) New(opts *osquery.ClientOpts) (*Client, error) {
-	client := &Client{
-		sshClient: opts.SSHClient,
-	}
+func (c *SSHClient) New(opts *ClientOpts) error {
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+	regionalSess := aws.GetRegionalSession(sess, opts.EC2SSHConfig.Region)
 
-	info, err := c.GetOSInfo
+	sshSession, err := aws.NewEC2SSHSession(regionalSess,
+		opts.EC2SSHConfig.IsPublic,
+		opts.EC2SSHConfig.ID,
+		opts.EC2SSHConfig.AZ,
+		opts.EC2SSHConfig.PublicIP,
+		opts.EC2SSHConfig.PrivateIP)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	client.info = info
-	return client, nil
+	c.sshClient = sshSession
+
+	info, err := c.GetOSInfo()
+	if err != nil {
+		return err
+	}
+
+	c.info = info
+	return nil
 }
 
 // osqueryi --json "select * from os_version"
-func (c *Client) GetOSInfo() (model.OSInfo, error) {
+func (c *SSHClient) GetOSInfo() (model.OSInfo, error) {
 
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
@@ -57,17 +69,17 @@ func (c *Client) GetOSInfo() (model.OSInfo, error) {
 		return model.OSInfo{}, errors.New("recieved error from machine when querying os information")
 	}
 
-	var osInfos []types.OSInfo
+	var osInfos []OSInfo
 	err = json.Unmarshal(stdout.Bytes(), &osInfos)
 	if err != nil {
-		return OSInfo{}, err
+		return model.OSInfo{}, err
 	}
 
 	if len(osInfos) > 0 {
 		return model.OSInfo{}, nil
 	}
 
-	return modelOSInfo{
+	return model.OSInfo{
 		ID:             osInfos[0].Name,
 		Version:        osInfos[0].Version,
 		BuildVersion:   fmt.Sprintf("%s.%s.%s", osInfos[0].Major, osInfos[0].Minor, osInfos[0].Patch),
@@ -77,8 +89,8 @@ func (c *Client) GetOSInfo() (model.OSInfo, error) {
 	}, nil
 }
 
-func (c *Client) GetOSPackages() ([]model.OSPackage, error) {
-	switch c.info.PlatformLike {
+func (c *SSHClient) GetOSPackages() ([]model.OSPackage, error) {
+	switch c.info.PlatformBase {
 	case "debian", "ubuntu":
 		/*
 			confirmed oses:
@@ -87,27 +99,27 @@ func (c *Client) GetOSPackages() ([]model.OSPackage, error) {
 		var stdout bytes.Buffer
 		var stderr bytes.Buffer
 
-		err := client.Cmd(`sudo osqueryi --json "select * from Deb_packages"`).SetStdio(&stdout, &stderr).Run()
+		err := c.sshClient.Cmd(`sudo osqueryi --json "select * from Deb_packages"`).SetStdio(&stdout, &stderr).Run()
 		if err != nil {
 			logrus.Errorf("error when getting osquery package info: %s", err.Error())
-			return []model.OSPAckage{}, errors.New("error getting OS packages")
+			return []model.OSPackage{}, errors.New("error getting OS packages")
 		}
 
 		logrus.Debugf("recieved from osquery packages command, out:(%s), err:(%s)", stdout.String(), stderr.String())
 
 		if stderr.String() != "" {
-			return []model.Package{}, errors.New("recieved stderr from machine when running package list")
+			return []model.OSPackage{}, errors.New("recieved stderr from machine when running package list")
 		}
 
-		var osPackages []types.Package
+		var osPackages []OSPackage
 		err = json.Unmarshal(stdout.Bytes(), &osPackages)
 		if err != nil {
-			return []model.Package{}, err
+			return []model.OSPackage{}, err
 		}
 
 		returnPkgs := make([]model.OSPackage, len(osPackages))
 		for idx, pkg := range osPackages {
-			returnPkgs[idx] = model.OSPAckage{
+			returnPkgs[idx] = model.OSPackage{
 				ID:         pkg.Name,
 				Version:    pkg.Version,
 				Source:     pkg.Source,
@@ -121,33 +133,33 @@ func (c *Client) GetOSPackages() ([]model.OSPackage, error) {
 			}
 		}
 
-		return retrunPkgs, nil
+		return returnPkgs, nil
 
 	default:
-		return []model.Package{}, errors.New("unkown operating system to collect packages from")
+		return []model.OSPackage{}, errors.New("unkown operating system to collect packages from")
 
 	}
-	return []model.Package{}, nil
+	return []model.OSPackage{}, nil
 }
 
-func (c *CLient) GetListeningApplications() ([]model.ListeningApplication, error) {
+func (c *SSHClient) GetListeningApplications() ([]model.ListeningApplication, error) {
 
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
 
-	err := client.Cmd(`sudo osqueryi --json "select distinct process.name, listening.port, listening.address, process.pid from processes as process join listening_ports as listening on process.pid = listening.pid"`).SetStdio(&stdout, &stderr).Run()
+	err := c.sshClient.Cmd(`sudo osqueryi --json "select distinct process.name, listening.port, listening.address, process.pid from processes as process join listening_ports as listening on process.pid = listening.pid"`).SetStdio(&stdout, &stderr).Run()
 	if err != nil {
 		logrus.Errorf("error when getting osquery package info: %s", err.Error())
-		return []model.ListeningApplication, errors.New("error getting listening applications from host")
+		return []model.ListeningApplication{}, errors.New("error getting listening applications from host")
 	}
 
 	logrus.Debugf("recieved from osquery listening processes command, out:(%s), err:(%s)", stdout.String(), stderr.String())
 
 	if stderr.String() != "" {
-		return []ListeningApplication{}, errors.New("recieved stderr from machine when running listening process list")
+		return []model.ListeningApplication{}, errors.New("recieved stderr from machine when running listening process list")
 	}
 
-	var listeningApps []types.ListeningApplication
+	var listeningApps []ListeningApplication
 	err = json.Unmarshal(stdout.Bytes(), &listeningApps)
 	if err != nil {
 		return []model.ListeningApplication{}, err
@@ -155,12 +167,12 @@ func (c *CLient) GetListeningApplications() ([]model.ListeningApplication, error
 
 	returnApps := make([]model.ListeningApplication, len(listeningApps))
 	for idx, app := range listeningApps {
-		returnApps[idx] = model.ListeningApplication {
-			IS: app.Name,
+		returnApps[idx] = model.ListeningApplication{
+			ID:      app.Name,
 			Address: app.Address,
-			Port: app.Port,
-			Pid: app.Pid,
+			Port:    app.Port,
+			Pid:     app.Pid,
 		}
 	}
-	return retrunApps, nil
+	return returnApps, nil
 }

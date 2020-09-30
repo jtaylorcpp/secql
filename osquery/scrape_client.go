@@ -1,4 +1,4 @@
-package agent
+package osquery
 
 import (
 	"encoding/json"
@@ -7,29 +7,37 @@ import (
 	"time"
 
 	"github.com/jtaylorcpp/secql/graph/model"
-	"github.com/jtaylorcpp/secql/osquery"
 )
 
-type Client struct {
+type ScrapeClient struct {
 	host       string
 	httpClient *http.Client
 }
 
-func (c *Client) New(opts *osquery.ClientOpts) (*Client, error) {
+func (c *ScrapeClient) New(opts *ClientOpts) error {
+	c.host = opts.Host
+
 	tr := &http.Transport{
 		MaxIdleConns:       10,
 		IdleConnTimeout:    30 * time.Second,
 		DisableCompression: true,
 	}
-	return &Client{
-		host: opts.Host,
-		httpClient: &http.Client{
-			Transport: tr,
-		},
+
+	c.httpClient = &http.Client{
+		Transport: tr,
 	}
+
+	err := c.Test()
+
+	return err
 }
 
-func (c *Client) GetOSInfo() (model.OSInfo, error) {
+func (c *ScrapeClient) Test() error {
+	_, err := c.GetOSInfo()
+	return err
+}
+
+func (c *ScrapeClient) GetOSInfo() (model.OSInfo, error) {
 	resp, err := c.httpClient.Get(c.host + "/os_info")
 	if err != nil {
 		return model.OSInfo{}, err
@@ -53,7 +61,7 @@ func (c *Client) GetOSInfo() (model.OSInfo, error) {
 	return model.OSInfo{}, nil
 }
 
-func (c *Client) GetOSPackages() ([]model.OSPackage, error) {
+func (c *ScrapeClient) GetOSPackages() ([]model.OSPackage, error) {
 	resp, err := c.httpClient.Get(c.host + "/os_packages")
 	if err != nil {
 		return []model.OSPackage{}, err
@@ -73,7 +81,7 @@ func (c *Client) GetOSPackages() ([]model.OSPackage, error) {
 	return osPackages, nil
 }
 
-func (c *Client) GetListeningApplications() ([]model.ListeningApplication, error) {
+func (c *ScrapeClient) GetListeningApplications() ([]model.ListeningApplication, error) {
 	resp, err := c.httpClient.Get(c.host + "/listening_applications")
 	if err != nil {
 		return []model.ListeningApplication{}, err

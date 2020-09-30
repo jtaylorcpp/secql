@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func GetAllEC2Instances(regionalSess *session.Session) ([]*model.EC2Instance, error) {
+func GetAllEC2Instances(regionalSess *session.Session, region string) ([]*model.EC2Instance, error) {
 	instanceModels := []*model.EC2Instance{}
 	svc := ec2.New(regionalSess)
 	input := &ec2.DescribeInstancesInput{
@@ -26,6 +26,7 @@ func GetAllEC2Instances(regionalSess *session.Session) ([]*model.EC2Instance, er
 						PublicIP:         *instance.PublicIpAddress,
 						PrivateIP:        *instance.PrivateIpAddress,
 						AvailabilityZone: *instance.Placement.AvailabilityZone,
+						Region:           region,
 					}
 
 					if instanceModel.PublicIP != "" {

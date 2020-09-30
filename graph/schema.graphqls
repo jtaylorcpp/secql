@@ -9,6 +9,7 @@ type EC2Instance {
   publicIP: String!
   privateIP: String!
   availabilityZone: String!
+  region: String!
   osInfo: OSInfo!
   ami: AMI!
   osPackages: [OSPackage!]!

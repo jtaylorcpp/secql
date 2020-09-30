@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/jtaylorcpp/secql/graph"
 	"github.com/jtaylorcpp/secql/graph/generated"
+	"github.com/jtaylorcpp/secql/osquery"
 	"github.com/spf13/cobra"
 )
 
@@ -28,9 +29,14 @@ var httpCmd = &cobra.Command{
 		sess := session.Must(session.NewSessionWithOptions(session.Options{
 			SharedConfigState: session.SharedConfigEnable,
 		}))
-		srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{
-			Session: sess,
-		}}))
+		srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
+			Resolvers: &graph.Resolver{
+				Session: sess,
+				Cache: &graph.OSQueryClientCache{
+					Cache: map[string]osquery.Client{},
+				},
+			},
+		}))
 
 		http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 		http.Handle("/query", srv)

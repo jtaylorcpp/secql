@@ -10,6 +10,7 @@ import (
 	"github.com/jtaylorcpp/secql/aws"
 	"github.com/jtaylorcpp/secql/graph/generated"
 	"github.com/jtaylorcpp/secql/graph/model"
+	"github.com/jtaylorcpp/secql/osquery"
 	"github.com/sirupsen/logrus"
 )
 
@@ -42,9 +43,38 @@ func (r *queryResolver) Ec2Instances(ctx context.Context) ([]*model.EC2Instance,
 	for _, region := range regions {
 		logrus.Debugf("running in region: %s", region)
 		regionalSess := aws.GetRegionalSession(r.Session, region)
-		instances, err := aws.GetAllEC2Instances(regionalSess)
+		instances, err := aws.GetAllEC2Instances(regionalSess, region)
 		if err != nil {
 			logrus.Errorf("error in region %s: %s", region, err.Error())
+		}
+		for _, instance := range instances {
+			if !r.Resolver.Cache.Exists(instance.ID) {
+				var osqueryHost string
+				if instance.Public {
+					osqueryHost = instance.PublicIP
+				} else {
+					osqueryHost = instance.PrivateIP
+				}
+
+				osqueryConfig := &osquery.ClientOpts{
+					Host: osqueryHost,
+					EC2SSHConfig: &osquery.OSQueryEC2SSHConfig{
+						ID:        instance.ID,
+						Region:    region,
+						AZ:        instance.AvailabilityZone,
+						IsPublic:  instance.Public,
+						PublicIP:  instance.PublicIP,
+						PrivateIP: instance.PrivateIP,
+					},
+				}
+
+				client, err := osquery.NewClient(osqueryConfig)
+				if err != nil {
+					logrus.Errorf("unable to create osquery client for ec2 instance %v: %v", instance.ID, err.Error())
+				} else {
+					r.Resolver.Cache.Put(instance.ID, client)
+				}
+			}
 		}
 		instanceModels = append(instanceModels, instances...)
 	}

@@ -13,7 +13,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2instanceconnect"
 	hellossh "github.com/helloyi/go-sshclient"
-	"github.com/jtaylorcpp/secql/graph/model"
 	"github.com/sirupsen/logrus"
 )
 
@@ -51,7 +50,7 @@ func GetRegionalSession(sess *session.Session, region string) *session.Session {
 	return regionalSession
 }
 
-func NewEC2SSHSession(sess *session.Session, instance model.EC2Instance) (*hellossh.Client, error) {
+func NewEC2SSHSession(sess *session.Session, isPublic bool, id, az, publicIP, privateIP string) (*hellossh.Client, error) {
 	possibleUserNames := []string{"ec2-user", "ubuntu"}
 	key, err := rsa.GenerateKey(rand.Reader, 4096)
 	if err != nil {
@@ -73,8 +72,8 @@ func NewEC2SSHSession(sess *session.Session, instance model.EC2Instance) (*hello
 	var sshClient *hellossh.Client
 	for _, user := range possibleUserNames {
 		input := &ec2instanceconnect.SendSSHPublicKeyInput{
-			AvailabilityZone: aws.String(instance.AvailabilityZone),
-			InstanceId:       aws.String(instance.ID),
+			AvailabilityZone: aws.String(az),
+			InstanceId:       aws.String(id),
 			InstanceOSUser:   aws.String(user),
 			SSHPublicKey:     aws.String(string(sshPubKeyBytes)),
 		}
@@ -84,7 +83,7 @@ func NewEC2SSHSession(sess *session.Session, instance model.EC2Instance) (*hello
 			logrus.Error(err.Error())
 			continue
 		}
-		logrus.Debugf("ec2 instance connect for user %s instance %s has result: %#v\n", user, instance.ID, result)
+		logrus.Debugf("ec2 instance connect for user %s instance %s has result: %#v\n", user, id, result)
 
 		// start ssh session
 		signer, err := ssh.NewSignerFromKey(key)
@@ -101,14 +100,14 @@ func NewEC2SSHSession(sess *session.Session, instance model.EC2Instance) (*hello
 			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		}
 
-		if instance.Public {
-			sshClient, err = hellossh.Dial("tcp", instance.PublicIP+":22", config)
+		if isPublic {
+			sshClient, err = hellossh.Dial("tcp", publicIP+":22", config)
 			if err != nil {
 				logrus.Error(err.Error())
 				continue
 			}
 		} else {
-			sshClient, err = hellossh.Dial("tcp", instance.PrivateIP+":22", config)
+			sshClient, err = hellossh.Dial("tcp", privateIP+":22", config)
 			if err != nil {
 				logrus.Error(err.Error())
 				continue

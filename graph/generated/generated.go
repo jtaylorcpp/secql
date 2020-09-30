@@ -58,6 +58,7 @@ type ComplexityRoot struct {
 		PrivateIP             func(childComplexity int) int
 		Public                func(childComplexity int) int
 		PublicIP              func(childComplexity int) int
+		Region                func(childComplexity int) int
 	}
 
 	ListeningApplication struct {
@@ -195,6 +196,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.EC2Instance.PublicIP(childComplexity), true
+
+	case "EC2Instance.region":
+		if e.complexity.EC2Instance.Region == nil {
+			break
+		}
+
+		return e.complexity.EC2Instance.Region(childComplexity), true
 
 	case "ListeningApplication.address":
 		if e.complexity.ListeningApplication.Address == nil {
@@ -404,6 +412,7 @@ type EC2Instance {
   publicIP: String!
   privateIP: String!
   availabilityZone: String!
+  region: String!
   osInfo: OSInfo!
   ami: AMI!
   osPackages: [OSPackage!]!
@@ -725,6 +734,40 @@ func (ec *executionContext) _EC2Instance_availabilityZone(ctx context.Context, f
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.AvailabilityZone, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _EC2Instance_region(ctx context.Context, field graphql.CollectedField, obj *model.EC2Instance) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "EC2Instance",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Region, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2788,6 +2831,11 @@ func (ec *executionContext) _EC2Instance(ctx context.Context, sel ast.SelectionS
 			}
 		case "availabilityZone":
 			out.Values[i] = ec._EC2Instance_availabilityZone(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "region":
+			out.Values[i] = ec._EC2Instance_region(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
