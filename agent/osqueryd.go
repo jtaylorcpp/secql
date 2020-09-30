@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 
+	"github.com/gobuffalo/packr"
 	"github.com/papertrail/go-tail/follower"
 	"github.com/sirupsen/logrus"
 )
@@ -87,10 +88,20 @@ func OSQueryIsInstaled() bool {
 	return false
 }
 
-func GetDefaultOSQuerydConfig() string {
-	return ""
+func GetDefaultOSQueryConfig() (string, error) {
+	configBox := packr.NewBox("../osquery/daemon_configs")
+	conf, err := configBox.FindString("default_config.conf")
+	return conf, err
 }
 
-func InstallDefaultOSQuerydConfig() error {
-	return nil
+func InstallDefaultOSQuerydConfig(path string) error {
+	defaultConfig, err := GetDefaultOSQueryConfig()
+	if err != nil {
+		logrus.Errorf("error getting default osquery file: %v", err.Error())
+	}
+	logrus.Infof("installing osquery config file: %v", defaultConfig)
+
+	err = ioutil.WriteFile(path, []byte(defaultConfig), 0644)
+
+	return err
 }

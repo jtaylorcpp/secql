@@ -47,6 +47,13 @@ apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys $OSQUERY_KEY
 add-apt-repository 'deb [arch=amd64] https://pkg.osquery.io/deb deb main'
 apt-get update -y
 apt-get install osquery -y
+
+apt-get install wget -y
+wget https://github.com/jtaylorcpp/secql/releases/download/v0.0.0/secqld_linux
+chmod +x secqld_linux
+./secqld_linux systemd install-secqld
+systemctl enable secqld
+systemctl restart secqld
   OSQ
 }
 data "aws_ami" "ubuntu" {
@@ -82,6 +89,10 @@ resource "aws_instance" "osquery" {
   }
 }
 
+data "http" "myip" {
+  url = "http://ipv4.icanhazip.com"
+}
+
 resource "aws_security_group" "basics" {
   name        = "basics"
   description = "Allow basic inbound traffic"
@@ -92,7 +103,19 @@ resource "aws_security_group" "basics" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [
+      "${chomp(data.http.myip.body)}/32"
+    ]
+  }
+
+  ingress {
+    description = "OSQuery Agent"
+    from_port   = 8000
+    to_port     = 8000
+    protocol    = "tcp"
+    cidr_blocks = [
+      "${chomp(data.http.myip.body)}/32"
+    ]
   }
 
   egress {
