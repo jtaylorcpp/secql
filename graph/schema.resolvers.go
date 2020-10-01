@@ -22,9 +22,9 @@ func (r *eC2InstanceResolver) OsInfo(ctx context.Context, obj *model.EC2Instance
 		logrus.Debugf("no client for instance %v", obj.ID)
 		var osqueryHost string
 		if obj.Public {
-			osqueryHost = obj.PublicIP
+			osqueryHost = "http://" + obj.PublicIP
 		} else {
-			osqueryHost = obj.PrivateIP
+			osqueryHost = "http://" + obj.PrivateIP
 		}
 
 		osqueryConfig := &osquery.ClientOpts{
@@ -67,9 +67,9 @@ func (r *eC2InstanceResolver) OsPackages(ctx context.Context, obj *model.EC2Inst
 		logrus.Debugf("no client for instance %v", obj.ID)
 		var osqueryHost string
 		if obj.Public {
-			osqueryHost = obj.PublicIP
+			osqueryHost = "http://" + obj.PublicIP
 		} else {
-			osqueryHost = obj.PrivateIP
+			osqueryHost = "http://" + obj.PrivateIP
 		}
 
 		osqueryConfig := &osquery.ClientOpts{
@@ -117,9 +117,9 @@ func (r *eC2InstanceResolver) ListeningApplications(ctx context.Context, obj *mo
 		logrus.Debugf("no client for instance %v", obj.ID)
 		var osqueryHost string
 		if obj.Public {
-			osqueryHost = obj.PublicIP
+			osqueryHost = "http://" + obj.PublicIP
 		} else {
-			osqueryHost = obj.PrivateIP
+			osqueryHost = "http://" + obj.PrivateIP
 		}
 
 		osqueryConfig := &osquery.ClientOpts{
@@ -184,9 +184,9 @@ func (r *queryResolver) Ec2Instances(ctx context.Context) ([]*model.EC2Instance,
 			if !r.Resolver.Cache.Exists(instance.ID) {
 				var osqueryHost string
 				if instance.Public {
-					osqueryHost = instance.PublicIP
+					osqueryHost = "http://" + instance.PublicIP
 				} else {
-					osqueryHost = instance.PrivateIP
+					osqueryHost = "http://" + instance.PrivateIP
 				}
 
 				osqueryConfig := &osquery.ClientOpts{
