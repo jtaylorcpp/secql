@@ -9,6 +9,15 @@ import (
 	"github.com/jtaylorcpp/secql/graph/model"
 )
 
+var (
+	defaultScheme string = "http://"
+	defaultPort   string = ":8000"
+)
+
+func OSQueryScrapeEndpointFromIP(ip string) string {
+	return defaultScheme + ip + defaultPort
+}
+
 type ScrapeClient struct {
 	host       string
 	httpClient *http.Client
@@ -19,7 +28,7 @@ func (c *ScrapeClient) New(opts *ClientOpts) error {
 
 	tr := &http.Transport{
 		MaxIdleConns:       10,
-		IdleConnTimeout:    30 * time.Second,
+		IdleConnTimeout:    5 * time.Second,
 		DisableCompression: true,
 	}
 
