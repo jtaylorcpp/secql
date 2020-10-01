@@ -49,7 +49,7 @@ apt-get update -y
 apt-get install osquery -y
 
 apt-get install wget -y
-wget https://github.com/jtaylorcpp/secql/releases/download/v0.0.5/secqld_linux
+wget https://github.com/jtaylorcpp/secql/releases/download/v0.0.6/secqld_linux
 chmod +x secqld_linux
 ./secqld_linux osquery install-osquery-conf
 systemctl restart osqueryd
