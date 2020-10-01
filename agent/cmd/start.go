@@ -8,7 +8,15 @@ import (
 
 func init() {
 	rootCmd.AddCommand(startCmd)
+
+	startCmd.PersistentFlags().StringVarP(&address, "address", "a", "127.0.0.1", "address to listen on")
+	startCmd.PersistentFlags().StringVarP(&port, "port", "p", "8000", "port to listen on")
 }
+
+var (
+	address string
+	port    string
+)
 
 var startCmd = &cobra.Command{
 	Use:   "start",
@@ -31,7 +39,7 @@ var startCmd = &cobra.Command{
 			logrus.Info(agent.StartTailOSQueryResult(osqueryResults, aggregator.OSQueryHandler, signalChan))
 		}()
 		logrus.Info("starting server")
-		logrus.Info(agent.StartServer(config, aggregator))
+		logrus.Info(agent.StartServer(config, aggregator, address, port))
 		// close out tailer
 		signalChan <- true
 	},

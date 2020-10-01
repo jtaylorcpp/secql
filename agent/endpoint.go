@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func StartServer(osqConfig *OSQueryConfig, aggregator *Aggregator) error {
+func StartServer(osqConfig *OSQueryConfig, aggregator *Aggregator, address, port string) error {
 	router := mux.NewRouter()
 
 	routeMap := map[string]bool{}
@@ -31,7 +31,7 @@ func StartServer(osqConfig *OSQueryConfig, aggregator *Aggregator) error {
 
 	srv := &http.Server{
 		Handler: router,
-		Addr:    "127.0.0.1:8000",
+		Addr:    address + ":" + port,
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,

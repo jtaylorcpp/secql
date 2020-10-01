@@ -17,13 +17,13 @@ After=osqueryd.service
 Type=simple
 Restart=on-failure
 RestartSec=5s
-ExecStart={{.ExecPath}} start
+ExecStart={{.ExecPath}} start -a {{.Address}}
 
 [Install]
 WantedBy=multi-user.target
 `
 
-func InstallSecqldSystemd(path string) error {
+func InstallSecqldSystemd(path string, address string) error {
 	/*
 			td := Todo{"Test templates", "Let's test a template to see the magic."}
 
@@ -43,8 +43,10 @@ func InstallSecqldSystemd(path string) error {
 
 	templateStruct := struct {
 		ExecPath string
+		Address  string
 	}{
 		binPath,
+		address,
 	}
 
 	templateBuffer := &bytes.Buffer{}
