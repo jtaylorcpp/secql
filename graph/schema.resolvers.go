@@ -15,15 +15,148 @@ import (
 )
 
 func (r *eC2InstanceResolver) OsInfo(ctx context.Context, obj *model.EC2Instance) (*model.OSInfo, error) {
-	panic(fmt.Errorf("not implemented"))
+	logrus.Debugf("getting os info for instance %v", obj.ID)
+	var client osquery.Client = nil
+	client = r.Resolver.Cache.Get(obj.ID)
+	if client == nil {
+		logrus.Debugf("no client for instance %v", obj.ID)
+		var osqueryHost string
+		if obj.Public {
+			osqueryHost = obj.PublicIP
+		} else {
+			osqueryHost = obj.PrivateIP
+		}
+
+		osqueryConfig := &osquery.ClientOpts{
+			Host: osqueryHost,
+			EC2SSHConfig: &osquery.OSQueryEC2SSHConfig{
+				ID:        obj.ID,
+				Region:    obj.Region,
+				AZ:        obj.AvailabilityZone,
+				IsPublic:  obj.Public,
+				PublicIP:  obj.PublicIP,
+				PrivateIP: obj.PrivateIP,
+			},
+		}
+		var err error = nil
+		client, err = osquery.NewClient(osqueryConfig)
+		if err != nil {
+			logrus.Errorf("unable to create osquery client for ec2 instance %v: %v", obj.ID, err.Error())
+		} else {
+			r.Resolver.Cache.Put(obj.ID, client)
+		}
+	}
+
+	if client == nil {
+		return nil, fmt.Errorf("no client could be found for instance %v", obj.ID)
+	}
+
+	info, infoError := client.GetOSInfo()
+	if infoError != nil {
+		logrus.Errorf("error getting os info for instance %v: %v", obj.ID, infoError.Error())
+	}
+
+	return &info, infoError
 }
 
 func (r *eC2InstanceResolver) OsPackages(ctx context.Context, obj *model.EC2Instance) ([]*model.OSPackage, error) {
-	panic(fmt.Errorf("not implemented"))
+	logrus.Debugf("getting os packages for instance %v", obj.ID)
+	var client osquery.Client = nil
+	client = r.Resolver.Cache.Get(obj.ID)
+	if client == nil {
+		logrus.Debugf("no client for instance %v", obj.ID)
+		var osqueryHost string
+		if obj.Public {
+			osqueryHost = obj.PublicIP
+		} else {
+			osqueryHost = obj.PrivateIP
+		}
+
+		osqueryConfig := &osquery.ClientOpts{
+			Host: osqueryHost,
+			EC2SSHConfig: &osquery.OSQueryEC2SSHConfig{
+				ID:        obj.ID,
+				Region:    obj.Region,
+				AZ:        obj.AvailabilityZone,
+				IsPublic:  obj.Public,
+				PublicIP:  obj.PublicIP,
+				PrivateIP: obj.PrivateIP,
+			},
+		}
+		var err error = nil
+		client, err = osquery.NewClient(osqueryConfig)
+		if err != nil {
+			logrus.Errorf("unable to create osquery client for ec2 instance %v: %v", obj.ID, err.Error())
+		} else {
+			r.Resolver.Cache.Put(obj.ID, client)
+		}
+	}
+
+	if client == nil {
+		return nil, fmt.Errorf("no client could be found for instance %v", obj.ID)
+	}
+
+	packages, pkgError := client.GetOSPackages()
+	if pkgError != nil {
+		logrus.Errorf("error getting os packages for instance %v: %v", obj.ID, pkgError.Error())
+	}
+
+	returnPkgs := make([]*model.OSPackage, len(packages))
+	for idx, pkg := range packages {
+		returnPkgs[idx] = &pkg
+	}
+
+	return returnPkgs, pkgError
 }
 
 func (r *eC2InstanceResolver) ListeningApplications(ctx context.Context, obj *model.EC2Instance) ([]*model.ListeningApplication, error) {
-	panic(fmt.Errorf("not implemented"))
+	logrus.Debugf("getting listening applications for instance %v", obj.ID)
+	var client osquery.Client = nil
+	client = r.Resolver.Cache.Get(obj.ID)
+	if client == nil {
+		logrus.Debugf("no client for instance %v", obj.ID)
+		var osqueryHost string
+		if obj.Public {
+			osqueryHost = obj.PublicIP
+		} else {
+			osqueryHost = obj.PrivateIP
+		}
+
+		osqueryConfig := &osquery.ClientOpts{
+			Host: osqueryHost,
+			EC2SSHConfig: &osquery.OSQueryEC2SSHConfig{
+				ID:        obj.ID,
+				Region:    obj.Region,
+				AZ:        obj.AvailabilityZone,
+				IsPublic:  obj.Public,
+				PublicIP:  obj.PublicIP,
+				PrivateIP: obj.PrivateIP,
+			},
+		}
+		var err error = nil
+		client, err = osquery.NewClient(osqueryConfig)
+		if err != nil {
+			logrus.Errorf("unable to create osquery client for ec2 instance %v: %v", obj.ID, err.Error())
+		} else {
+			r.Resolver.Cache.Put(obj.ID, client)
+		}
+	}
+
+	if client == nil {
+		return nil, fmt.Errorf("no client could be found for instance %v", obj.ID)
+	}
+
+	apps, appError := client.GetListeningApplications()
+	if appError != nil {
+		logrus.Errorf("error getting listening applications for instance %v: %v", obj.ID, appError.Error())
+	}
+
+	returnApps := make([]*model.ListeningApplication, len(apps))
+	for idx, app := range apps {
+		returnApps[idx] = &app
+	}
+
+	return returnApps, appError
 }
 
 func (r *queryResolver) Ec2Instances(ctx context.Context) ([]*model.EC2Instance, error) {
